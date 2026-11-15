@@ -107,7 +107,7 @@ textarea{min-height:75px;resize:vertical}
 .mem-card{width:58px;height:58px;border-radius:10px;background:linear-gradient(135deg,#3b1d6e,#1e143b);border:1px solid var(--accent);font-size:24px;display:flex;align-items:center;justify-content:center;cursor:pointer}
 .mem-card.open{background:#121836;border-color:var(--cyan)}
 .camera-box{background:linear-gradient(135deg, #130d24, #081222);border:2px solid var(--cyan);border-radius:16px;padding:16px;margin:12px auto;max-width:520px;text-align:center}
-.camera-preview{width:100%;max-height:300px;background:#05050f;border:2px solid var(--accent);border-radius:12px;object-fit:cover;margin:8px 0}
+.camera-preview{width:100%;max-height:260px;background:#05050f;border:2px solid var(--accent);border-radius:12px;object-fit:cover;margin:8px 0}
 .sticker-bar{display:flex;justify-content:center;gap:6px;margin:6px 0;flex-wrap:wrap}
 .sticker-btn{background:#1f1338;border:1px solid var(--accent);padding:5px 10px;border-radius:8px;cursor:pointer;font-size:16px}
 .sticker-btn.active{border-color:var(--cyan);background:#381d6e}
@@ -120,13 +120,14 @@ footer{text-align:center;padding:25px;color:var(--pink);font-weight:bold;letter-
 <header>
   <div class="logo">ODHMA GAMING</div>
   <div class="by">✦ BY OSMAN ✦</div>
-  <div class="subtitle">OYUN • CANLI AĞ SOHBETİ • MESAJ SİLME • GRUPLAR</div>
+  <div class="subtitle">OYUN • SOHBET • GÖRÜNTÜLÜ ARAMA • GRUPLAR</div>
 </header>
 
 <nav id="mainNav">
   <button class="nav-btn active" data-page="home" onclick="go('home')">🏠 Ana Sayfa</button>
   <button class="nav-btn" data-page="games" onclick="go('games')">🎮 Oyunlar (50)</button>
   <button class="nav-btn" data-page="chat" onclick="go('chat')">💬 Canlı Sohbet <span id="netDot" style="color:#ff3c9d">●</span></button>
+  <button class="nav-btn" data-page="call" onclick="go('call')">📞 Görüntülü Arama</button>
   <button class="nav-btn" data-page="camera" onclick="go('camera')">📷 Kamera</button>
   <button class="nav-btn" data-page="profile" onclick="go('profile')">👤 Profilim</button>
   <button class="nav-btn" data-page="friends" onclick="go('friends')">👥 Arkadaşlar <span id="friendBadge" class="badge" style="display:none">0</span></button>
@@ -139,7 +140,7 @@ footer{text-align:center;padding:25px;color:var(--pink);font-weight:bold;letter-
 <!-- 1. ANA SAYFA -->
 <section id="home" class="page active">
   <h2>🔥 ODHMA DÜNYASINA HOŞ GELDİN!</h2>
-  <p class="muted" style="text-align:center">Eğlence, rekabet ve gerçek zamanlı sohbet tek bir yerde!</p>
+  <p class="muted" style="text-align:center">Eğlence, rekabet ve görüntülü konuşma tek bir yerde!</p>
   
   <div class="characters">
     <div class="card char-card neighbor">
@@ -161,9 +162,9 @@ footer{text-align:center;padding:25px;color:var(--pink);font-weight:bold;letter-
       <button onclick="go('games')">OYUNLARA GİT</button>
     </div>
     <div class="panel">
-      <h2>📷 NEON KAMERA STÜDYOSU</h2>
-      <p class="muted">Canlı kamera aç, filtre uygula ve fotoğraf çek!</p>
-      <button onclick="go('camera')">KAMERAYI AÇ</button>
+      <h2>📞 GÖRÜNTÜLÜ ARAMA</h2>
+      <p class="muted">Arkadaşını ara ve canlı konuşmaya başla!</p>
+      <button onclick="go('call')">ARAMAYA GİT</button>
     </div>
   </div>
 
@@ -224,7 +225,48 @@ footer{text-align:center;padding:25px;color:var(--pink);font-weight:bold;letter-
   </div>
 </section>
 
-<!-- 4. KAMERA -->
+<!-- 4. GÖRÜNTÜLÜ VE SESLİ ARAMA -->
+<section id="call" class="page">
+  <h2>📞 CANLI SESLİ & GÖRÜNTÜLÜ ARAMA</h2>
+  <div class="panel">
+    <div id="callSetup" style="max-width:450px;margin:auto">
+      <p class="muted">Arkadaşının ID'sini girerek onu aramaya başlayabilirsin.</p>
+      <input id="callTargetId" placeholder="Arkadaş ID gir (Örn: OSM#12345)">
+      <div class="row" style="margin-top:10px">
+        <button onclick="startCall(true)" style="background:#047857">📹 Görüntülü Ara</button>
+        <button onclick="startCall(false)" style="background:#1d4ed8">📞 Sadece Sesli</button>
+      </div>
+      <p id="callStatus" class="muted" style="margin-top:10px"></p>
+    </div>
+
+    <div id="incomingCallBox" style="display:none;margin:20px auto;padding:15px;background:#2b1654;border:2px solid var(--pink);border-radius:14px;max-width:400px">
+      <h3 style="color:var(--pink);margin:0 0 10px">🔔 GELEN ARAMA!</h3>
+      <p id="incomingCallerText" style="font-weight:bold"></p>
+      <div class="row">
+        <button onclick="acceptCall()" style="background:#047857">✅ Kabul Et</button>
+        <button onclick="rejectCall()" style="background:#7f1d1d">❌ Reddet</button>
+      </div>
+    </div>
+
+    <div id="activeCallBox" style="display:none;margin-top:15px">
+      <div class="row" style="flex-wrap:wrap;justify-content:center;gap:15px">
+        <div style="flex:1;min-width:280px;text-align:center">
+          <h4 style="color:var(--cyan);margin:0 0 5px">Senin Kameran</h4>
+          <video id="localVideo" autoplay playsinline muted style="width:100%;max-height:240px;background:#000;border:2px solid var(--accent);border-radius:10px"></video>
+        </div>
+        <div style="flex:1;min-width:280px;text-align:center">
+          <h4 style="color:var(--pink);margin:0 0 5px">Karşı Taraf</h4>
+          <video id="remoteVideo" autoplay playsinline style="width:100%;max-height:240px;background:#000;border:2px solid var(--cyan);border-radius:10px"></video>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:15px">
+        <button onclick="hangUpCall()" style="background:#7f1d1d;max-width:200px">📴 Aramayı Sonlandır</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5. KAMERA -->
 <section id="camera" class="page">
   <h2>📷 ODHMA NEON KAMERA STÜDYOSU</h2>
   <div class="panel">
@@ -277,7 +319,7 @@ footer{text-align:center;padding:25px;color:var(--pink);font-weight:bold;letter-
   </div>
 </section>
 
-<!-- 5. PROFİL -->
+<!-- 6. PROFİL -->
 <section id="profile" class="page">
   <h2>👤 PROFİLİM</h2>
   <div class="panel">
@@ -305,7 +347,7 @@ footer{text-align:center;padding:25px;color:var(--pink);font-weight:bold;letter-
   </div>
 </section>
 
-<!-- 6. ARKADAŞLAR -->
+<!-- 7. ARKADAŞLAR -->
 <section id="friends" class="page">
   <h2>👥 CANLI ARKADAŞLIK SİSTEMİ</h2>
   <div class="panel">
@@ -326,7 +368,7 @@ footer{text-align:center;padding:25px;color:var(--pink);font-weight:bold;letter-
   </div>
 </section>
 
-<!-- 7. GRUPLAR -->
+<!-- 8. GRUPLAR -->
 <section id="groups" class="page">
   <h2>🛡️ CANLI GRUPLAR</h2>
   <div class="panel">
@@ -355,7 +397,7 @@ footer{text-align:center;padding:25px;color:var(--pink);font-weight:bold;letter-
   </div>
 </section>
 
-<!-- 8. LİDERLİK -->
+<!-- 9. LİDERLİK -->
 <section id="leader" class="page">
   <h2>🏆 ÇEVRİMİÇİ OYUNCULAR</h2>
   <div class="panel">
@@ -363,7 +405,7 @@ footer{text-align:center;padding:25px;color:var(--pink);font-weight:bold;letter-
   </div>
 </section>
 
-<!-- 9. AYARLAR -->
+<!-- 10. AYARLAR -->
 <section id="settings" class="page">
   <h2>⚙️ AYARLAR</h2>
   <div class="panel" style="text-align:left;max-width:500px;margin:15px auto">
@@ -396,15 +438,23 @@ function profile(){
 }
 
 // ==========================================
-// GERÇEK ZAMANLI CANLI AĞ (MQTT WEBSOCKET)
+// GERÇEK ZAMANLI CANLI AĞ (MQTT & WEBRTC)
 // ==========================================
 const TOPIC_CHAT = "odhma_gaming_osman_2026/chat";
 const TOPIC_SOCIAL = "odhma_gaming_osman_2026/social";
 const TOPIC_GROUPS = "odhma_gaming_osman_2026/groups";
+const TOPIC_CALL = "odhma_gaming_osman_2026/call";
+
 let mqttClient = null;
 let onlineUsers = {};
 let activeGroup = null;
 let liveGroups = {};
+
+// WebRTC Değişkenleri
+let peerConnection = null;
+let localStream = null;
+let incomingCallData = null;
+const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
 
 function connectLiveNetwork(){
   const clientId = "odh_" + Math.random().toString(16).slice(2, 10);
@@ -420,15 +470,14 @@ function connectLiveNetwork(){
     try {
       const data = JSON.parse(message.payloadString);
       if(message.destinationName === TOPIC_CHAT){
-        if(data.type === 'DELETE_MSG'){
-          removeLiveMessage(data.id);
-        } else {
-          receiveLiveMessage(data);
-        }
+        if(data.type === 'DELETE_MSG') removeLiveMessage(data.id);
+        else receiveLiveMessage(data);
       } else if(message.destinationName === TOPIC_SOCIAL){
         handleSocialEvent(data);
       } else if(message.destinationName === TOPIC_GROUPS){
         handleGroupEvent(data);
+      } else if(message.destinationName === TOPIC_CALL){
+        handleCallSignaling(data);
       }
     } catch(e){}
   };
@@ -437,10 +486,11 @@ function connectLiveNetwork(){
     useSSL: true,
     onSuccess: () => {
       if($('netDot')) $('netDot').style.color = '#00ff88';
-      if($('connStatusText')) $('connStatusText').textContent = '🟢 Canlı Ağ Bağlı! (Mesaj silebilirsin)';
+      if($('connStatusText')) $('connStatusText').textContent = '🟢 Canlı Ağ ve Arama Sistemi Aktif!';
       mqttClient.subscribe(TOPIC_CHAT);
       mqttClient.subscribe(TOPIC_SOCIAL);
       mqttClient.subscribe(TOPIC_GROUPS);
+      mqttClient.subscribe(TOPIC_CALL);
       announcePresence();
       setInterval(announcePresence, 15000);
     },
@@ -460,12 +510,7 @@ function publishPacket(topic, obj){
 
 function announcePresence(){
   const p = profile();
-  publishPacket(TOPIC_SOCIAL, {
-    type: 'HELLO',
-    friendId: p.friendId,
-    name: p.name,
-    className: p.className
-  });
+  publishPacket(TOPIC_SOCIAL, { type: 'HELLO', friendId: p.friendId, name: p.name, className: p.className });
 }
 
 function handleSocialEvent(data){
@@ -507,6 +552,137 @@ function handleGroupEvent(data){
   }
 }
 
+// ==========================================
+// WEBRTC ARAMA SİNYALİZASYONU
+// ==========================================
+async function startCall(withVideo){
+  const targetId = $('callTargetId').value.trim().toUpperCase();
+  const p = profile();
+  if(!targetId || targetId === p.friendId){
+    $('callStatus').textContent = '⚠️ Geçerli bir arkadaş ID gir!';
+    return;
+  }
+  $('callStatus').textContent = '📞 Aranıyor...';
+  
+  try {
+    localStream = await navigator.mediaDevices.getUserMedia({ video: withVideo, audio: true });
+    $('localVideo').srcObject = localStream;
+    
+    createPeerConnection(targetId);
+    
+    const offer = await peerConnection.createOffer();
+    await peerConnection.setLocalDescription(offer);
+    
+    publishPacket(TOPIC_CALL, {
+      type: 'OFFER',
+      fromId: p.friendId,
+      fromName: p.name,
+      toId: targetId,
+      offer: offer
+    });
+  } catch(e) {
+    $('callStatus').textContent = '❌ Kamera veya mikrofon izni alınamadı!';
+  }
+}
+
+function createPeerConnection(remoteId){
+  peerConnection = new RTCPeerConnection(rtcConfig);
+  
+  localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+  
+  peerConnection.ontrack = event => {
+    $('remoteVideo').srcObject = event.streams[0];
+    $('callSetup').style.display = 'none';
+    $('activeCallBox').style.display = 'block';
+  };
+  
+  peerConnection.onicecandidate = event => {
+    if(event.candidate){
+      publishPacket(TOPIC_CALL, {
+        type: 'CANDIDATE',
+        toId: remoteId,
+        candidate: event.candidate
+      });
+    }
+  };
+}
+
+async function handleCallSignaling(data){
+  const p = profile();
+  if(data.toId !== p.friendId) return;
+
+  if(data.type === 'OFFER'){
+    incomingCallData = data;
+    $('incomingCallerText').textContent = `${data.fromName} (${data.fromId}) sizi arıyor...`;
+    $('incomingCallBox').style.display = 'block';
+    playBeep(700, 0.2);
+  }
+  else if(data.type === 'ANSWER'){
+    await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
+    $('callSetup').style.display = 'none';
+    $('activeCallBox').style.display = 'block';
+  }
+  else if(data.type === 'CANDIDATE'){
+    if(peerConnection){
+      try{ await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate)); }catch(e){}
+    }
+  }
+  else if(data.type === 'REJECT' || data.type === 'HANGUP'){
+    hangUpCall();
+    alert('📴 Arama sonlandırıldı.');
+  }
+}
+
+async function acceptCall(){
+  if(!incomingCallData) return;
+  $('incomingCallBox').style.display = 'none';
+  
+  try {
+    localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    $('localVideo').srcObject = localStream;
+    
+    createPeerConnection(incomingCallData.fromId);
+    
+    await peerConnection.setRemoteDescription(new RTCSessionDescription(incomingCallData.offer));
+    const answer = await peerConnection.createAnswer();
+    await peerConnection.setLocalDescription(answer);
+    
+    publishPacket(TOPIC_CALL, {
+      type: 'ANSWER',
+      toId: incomingCallData.fromId,
+      answer: answer
+    });
+  } catch(e){
+    alert('Kamera veya mikrofon açılamadı!');
+  }
+}
+
+function rejectCall(){
+  if(incomingCallData){
+    publishPacket(TOPIC_CALL, { type: 'REJECT', toId: incomingCallData.fromId });
+  }
+  $('incomingCallBox').style.display = 'none';
+  incomingCallData = null;
+}
+
+function hangUpCall(){
+  if(peerConnection){
+    peerConnection.close();
+    peerConnection = null;
+  }
+  if(localStream){
+    localStream.getTracks().forEach(t => t.stop());
+    localStream = null;
+  }
+  $('activeCallBox').style.display = 'none';
+  $('incomingCallBox').style.display = 'none';
+  $('callSetup').style.display = 'block';
+  $('callStatus').textContent = '';
+}
+
+// ==========================================
+// SOHBET & DİĞER FONKSİYONLAR
+// ==========================================
 function receiveLiveMessage(msg){
   let msgs = get('odh_live_chat', []);
   if(msgs.some(m => m.id === msg.id)) return;
@@ -554,7 +730,6 @@ function renderChat(msgs){
     const s=document.createElement('small');
     s.textContent=`${m.name} (${m.senderId}) • ${m.className} • ${new Date(m.time).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'})}`;
     
-    // Kendi mesajına Sil butonu ekle
     if(m.senderId === p.friendId){
       const delBtn = document.createElement('button');
       delBtn.textContent = '🗑️ Sil';
