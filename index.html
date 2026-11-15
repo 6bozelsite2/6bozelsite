@@ -290,7 +290,7 @@ footer{text-align:center;padding:30px;color:var(--pink);font-weight:bold;letter-
   <h2>💬 ODHMA GENEL SOHBET</h2>
   <div class="panel">
     <div class="row" style="margin-bottom:10px;justify-content:space-between">
-      <span id="chatStatus" class="muted" style="text-align:left">🟢 Sohbet aktif!</span>
+      <span id="chatStatus" class="muted" style="text-align:left">🟢 Yerel Sohbet Aktif</span>
       <button onclick="clearChatHistory()" style="max-width:155px;padding:6px 10px;font-size:12px;background:#4a1525">🗑️ Ekranı Temizle</button>
     </div>
     <div id="chatbox" class="chatbox"></div>
@@ -418,7 +418,7 @@ footer{text-align:center;padding:30px;color:var(--pink);font-weight:bold;letter-
 
 <!-- 7. GRUPLAR & SESLİ/KAMERALI SOHBET -->
 <section id="groups" class="page">
-  <h2>🛡️ GRUPLAR, SESLİ VE KAMERALI SOHBET</h2>
+  <h2>🛡️ GRUPLAR VE SESLİ SOHBET</h2>
   <div class="panel">
     <h3>✨ Yeni Grup Oluştur</h3>
     <div class="formgrid">
@@ -436,7 +436,6 @@ footer{text-align:center;padding:30px;color:var(--pink);font-weight:bold;letter-
   <div id="activeGroupArea" class="panel" style="display:none;border:2px solid var(--cyan)">
     <div class="row" style="margin-bottom:12px">
       <div style="display:flex;align-items:center;gap:12px;text-align:left">
-        <img id="activeGroupImg" src="" style="width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--cyan);display:none">
         <h3 id="activeGroupName" style="margin:0;color:var(--cyan)">Grup Adı</h3>
       </div>
       <div style="display:flex;gap:8px;justify-content:flex-end">
@@ -444,13 +443,8 @@ footer{text-align:center;padding:30px;color:var(--pink);font-weight:bold;letter-
       </div>
     </div>
 
-    <div class="row" style="margin:10px 0">
-      <input id="inviteFriendId" placeholder="Arkadaş ID ile gruba davet et (Örn: OSM#12345)">
-      <button onclick="inviteToGroup()" style="max-width:160px">Davet Et</button>
-    </div>
-    
     <div class="voice-box">
-      <h4 style="color:var(--cyan);margin:0 0 6px">🎙️🎥 Grup Sesli & Kameralı Sohbet Odası</h4>
+      <h4 style="color:var(--cyan);margin:0 0 6px">🎙️🎥 Sesli & Kameralı Oda</h4>
       <p id="voiceStatus" class="muted" style="margin:4px 0 12px">Bağlantı kapalı.</p>
       <div id="videoContainer" style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin:12px 0"></div>
       <div class="row" style="max-width:620px;margin:auto;flex-wrap:wrap">
@@ -495,26 +489,9 @@ footer{text-align:center;padding:30px;color:var(--pink);font-weight:bold;letter-
 </section>
 </main>
 
-<!-- PROFİL MODALI -->
-<div id="profileModal" class="modal-backdrop" onclick="if(event.target===this)this.style.display='none'">
-  <div class="modal-card">
-    <img id="modalAvatar" class="profilepic" alt="Profil">
-    <h3 id="modalName" style="margin:10px 0 4px;color:var(--cyan)">Oyuncu</h3>
-    <div id="modalId" class="muted" style="font-weight:bold">OSM#00000</div>
-    <div id="modalClass" class="muted" style="margin:4px 0">Sınıf: 6/B</div>
-    <p id="modalBio" style="background:#0d0b1c;padding:10px;border-radius:10px;font-size:14px">Hakkımda bilgisi yok.</p>
-    <button onclick="$('profileModal').style.display='none'" style="width:100%">Kapat</button>
-  </div>
-</div>
-
 <footer>⚡ BY OSMAN ⚡<br><br>ODHMA GAMING</footer>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const SUPABASE_URL="https://tyunwlqwtnnxpbtewcaj.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY="sb_publishable_aK9Iiec6CyWeKVnt7W3G3w_7XgA7ASP";
-
-let supabaseClient=null;
 let activeGroupId=null;
 let localStream=null, isMuted=false, isCamOff=false;
 let studioStream=null, studioFacingMode='user', lastCapturedDataUrl='', selectedSticker='';
@@ -555,23 +532,9 @@ function go(page){
   if(page==='leader')loadLeaderboard();
 }
 
-async function loadAllChatMessages(){
-  let cloudData=[];
-  if(supabaseClient){
-    try{
-      const {data,error}=await supabaseClient.from('messages').select('*').order('created_at',{ascending:true}).limit(150);
-      if(!error && data) cloudData=data;
-    }catch(e){}
-  }
-  let localData=get('odh_chat_v4',[]);
-  if(!Array.isArray(localData)) localData=[];
-
-  let map=new Map();
-  [...cloudData, ...localData].forEach(m=>{
-    if(m && m.text) map.set(m.id || (m.name+m.text+m.created_at), m);
-  });
-  let merged=Array.from(map.values()).sort((a,b)=>new Date(a.created_at||0)-new Date(b.created_at||0));
-  renderChat(merged);
+function loadAllChatMessages(){
+  let msgs=get('odh_chat_local',[]);
+  renderChat(msgs);
 }
 
 function renderChat(msgs){
@@ -604,7 +567,7 @@ function renderChat(msgs){
   box.scrollTop=box.scrollHeight;
 }
 
-async function sendMessage(){
+function sendMessage(){
   const input=$('message');
   const text=input.value.trim();
   if(!text)return;
@@ -621,68 +584,36 @@ async function sendMessage(){
     created_at:new Date().toISOString()
   };
 
-  let local=get('odh_chat_v4',[]);
+  let local=get('odh_chat_local',[]);
   local.push(newMsg);
   if(local.length>150) local.shift();
-  set('odh_chat_v4', local);
+  set('odh_chat_local', local);
 
   input.value='';
   loadAllChatMessages();
   playBeep(680,0.07);
-
-  if(supabaseClient){
-    try{
-      await supabaseClient.from('messages').insert({
-        user_id:newMsg.user_id,
-        name:newMsg.name,
-        class:newMsg.class,
-        avatar:newMsg.avatar,
-        text:newMsg.text
-      });
-    }catch(e){}
-  }
 }
 
-async function editMessage(id, oldText){
+function editMessage(id, oldText){
   const newText=prompt('Mesajı düzenle:', oldText);
   if(newText===null || newText.trim()==='')return;
-  let local=get('odh_chat_v4',[]).map(m=>{
+  let local=get('odh_chat_local',[]).map(m=>{
     if(m.id===id){m.text=newText.trim();m.edited=true;}
     return m;
   });
-  set('odh_chat_v4', local);
-  if(supabaseClient){try{await supabaseClient.from('messages').update({text:newText.trim(),edited:true}).eq('id',id);}catch{}}
+  set('odh_chat_local', local);
   loadAllChatMessages();
 }
 
-async function deleteMessage(id){
-  let local=get('odh_chat_v4',[]).filter(m=>m.id!==id);
-  set('odh_chat_v4', local);
-  if(supabaseClient){try{await supabaseClient.from('messages').delete().eq('id',id);}catch{}}
+function deleteMessage(id){
+  let local=get('odh_chat_local',[]).filter(m=>m.id!==id);
+  set('odh_chat_local', local);
   loadAllChatMessages();
 }
 
 function clearChatHistory(){
   if(!confirm('Sohbet ekranını temizlemek istiyor musun?'))return;
-  set('odh_chat_v4',[]);
-  loadAllChatMessages();
-}
-
-window.addEventListener('storage', e=>{
-  if(e.key==='odh_chat_v4') loadAllChatMessages();
-});
-
-async function initSupabase(){
-  try{
-    if(window.supabase?.createClient){
-      supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
-      let p=profile();
-      await supabaseClient.from('profiles').upsert({
-        user_id:myDeviceId, friend_id:p.friendId, name:p.name, class_name:p.className, bio:p.bio, color:p.color, avatar:p.avatar
-      },{onConflict:'user_id'});
-      loadFriendsData();
-    }
-  }catch(e){}
+  set('odh_chat_local',[]);
   loadAllChatMessages();
 }
 
@@ -745,10 +676,9 @@ function handleAvatarUpload(e){
   reader.onload=ev=>{const img=new Image();img.onload=()=>{const c=document.createElement('canvas');c.width=140;c.height=140;c.getContext('2d').drawImage(img,0,0,140,140);const url=c.toDataURL('image/jpeg',0.75);$('avatarUrl').value=url;$('avatarPreview').src=url;};img.src=ev.target.result;};
   reader.readAsDataURL(file);
 }
-async function saveProfile(){
+function saveProfile(){
   let name=$('profileName').value.trim();if(!name){alert('Ad girin.');return;}
   let p=profile();p.name=name;p.className=$('profileClass').value;p.bio=$('bio').value;p.color=$('profileColor').value;p.avatar=$('avatarUrl').value.trim();set('odh_profile',p);
-  if(supabaseClient){try{await supabaseClient.from('profiles').upsert({user_id:myDeviceId,friend_id:p.friendId,name:p.name,class_name:p.className,bio:p.bio,color:p.color,avatar:p.avatar},{onConflict:'user_id'});}catch{}}
   $('profileStatus').textContent='✅ Profil kaydedildi!';applyProfileToUI();
 }
 function applyProfileToUI(){
@@ -757,78 +687,52 @@ function applyProfileToUI(){
 }
 function copyMyId(){navigator.clipboard.writeText(profile().friendId);alert('ID Kopyalandı: '+profile().friendId);}
 
-async function loadFriendsData(){
-  if(!supabaseClient)return;
-  try{
-    let p=profile(), {data: reqs}=await supabaseClient.from('friendships').select('*').eq('receiver_id',p.friendId).eq('status','pending');
-    let reqDiv=$('incomingRequestsList');reqDiv.innerHTML='';
-    const badge=$('friendBadge');
-    if(reqs && reqs.length>0){badge.textContent=reqs.length;badge.style.display='inline-block';}else{badge.style.display='none';}
-    if(!reqs || reqs.length===0){reqDiv.textContent='Gelen istek yok.';}
-    else{
-      for(let r of reqs){
-        let row=document.createElement('div');row.className='row';row.style.margin='8px 0';
-        row.innerHTML=`<span><b>${r.sender_id}</b> arkadaşlık isteği gönderdi</span>`;
-        let accBtn=document.createElement('button');accBtn.textContent='✅ Kabul';accBtn.onclick=async()=>{await supabaseClient.from('friendships').update({status:'accepted'}).eq('id',r.id);loadFriendsData();};
-        let rejBtn=document.createElement('button');rejBtn.textContent='❌ Red';rejBtn.style.background='#7f1d1d';rejBtn.onclick=async()=>{await supabaseClient.from('friendships').delete().eq('id',r.id);loadFriendsData();};
-        row.append(accBtn,rejBtn);reqDiv.append(row);
-      }
-    }
-    let {data: f1}=await supabaseClient.from('friendships').select('*').eq('sender_id',p.friendId).eq('status','accepted');
-    let {data: f2}=await supabaseClient.from('friendships').select('*').eq('receiver_id',p.friendId).eq('status','accepted');
-    let fIds=[];(f1||[]).forEach(x=>fIds.push(x.receiver_id));(f2||[]).forEach(x=>fIds.push(x.sender_id));
-    let fListDiv=$('friendsList');fListDiv.innerHTML=fIds.length===0?'Henüz arkadaşın yok.':'';
-    fIds.forEach(fid=>{let r=document.createElement('div');r.style.margin='6px 0';r.innerHTML=`<b>🤝 ${fid}</b>`;fListDiv.append(r);});
-  }catch{}
+function loadFriendsData(){
+  let list=get('odh_friends',[]);
+  let fDiv=$('friendsList');fDiv.innerHTML=list.length===0?'Henüz arkadaşın yok.':'';
+  list.forEach(f=>{let r=document.createElement('div');r.style.margin='6px 0';r.innerHTML=`<b>🤝 ${f}</b>`;fDiv.append(r);});
 }
-async function sendFriendRequest(){
-  let targetId=$('addFriendInput').value.trim().toUpperCase(), p=profile();
-  if(!targetId || targetId===p.friendId || !supabaseClient)return;
-  await supabaseClient.from('friendships').insert({sender_id:p.friendId,receiver_id:targetId,status:'pending'});
-  $('addFriendInput').value='';$('friendRequestStatus').textContent='✅ İstek gönderildi!';
+function sendFriendRequest(){
+  let id=$('addFriendInput').value.trim().toUpperCase();if(!id)return;
+  let list=get('odh_friends',[]);
+  if(!list.includes(id)){list.push(id);set('odh_friends',list);}
+  $('addFriendInput').value='';$('friendRequestStatus').textContent='✅ Arkadaş eklendi!';loadFriendsData();
 }
 
-async function loadGroupsData(){
-  if(!supabaseClient)return;
-  try{
-    let p=profile(), {data: mems}=await supabaseClient.from('group_members').select('group_id').eq('user_id',p.friendId);
-    let gIds=(mems||[]).map(x=>x.group_id), listDiv=$('myGroupsList');listDiv.innerHTML='';
-    if(gIds.length===0){listDiv.textContent='Henüz bir grubun yok.';return;}
-    let {data: groups}=await supabaseClient.from('groups').select('*').in('id',gIds);
-    (groups||[]).forEach(g=>{let row=document.createElement('div');row.className='row';row.style.margin='8px 0';row.innerHTML=`<b>${g.name}</b>`;let btn=document.createElement('button');btn.textContent='Gruba Gir ➤';btn.onclick=()=>openGroup(g);row.append(btn);listDiv.append(row);});
-  }catch{}
+function loadGroupsData(){
+  let groups=get('odh_groups',[]);
+  let listDiv=$('myGroupsList');listDiv.innerHTML='';
+  if(groups.length===0){listDiv.textContent='Henüz bir grubun yok.';return;}
+  groups.forEach(g=>{let row=document.createElement('div');row.className='row';row.style.margin='8px 0';row.innerHTML=`<b>${g.name}</b>`;let btn=document.createElement('button');btn.textContent='Gruba Gir ➤';btn.onclick=()=>openGroup(g);row.append(btn);listDiv.append(row);});
 }
-async function createGroup(){
-  let name=$('newGroupName').value.trim(), avatar=$('newGroupAvatar').value.trim(), p=profile();
-  if(!name || !supabaseClient)return;
-  let {data: g}=await supabaseClient.from('groups').insert({name,admin_id:p.friendId,avatar}).select().single();
-  if(g){await supabaseClient.from('group_members').insert({group_id:g.id,user_id:p.friendId,role:'admin'});$('newGroupName').value='';loadGroupsData();}
+function createGroup(){
+  let name=$('newGroupName').value.trim();if(!name)return;
+  let groups=get('odh_groups',[]);
+  let newG={id:'g_'+Date.now(),name,messages:[]};
+  groups.push(newG);set('odh_groups',groups);
+  $('newGroupName').value='';loadGroupsData();
 }
-async function openGroup(g){
+function openGroup(g){
   activeGroupId=g.id;$('activeGroupName').textContent=g.name;$('activeGroupArea').style.display='block';loadGroupMessages();
 }
-async function inviteToGroup(){
-  let fid=$('inviteFriendId').value.trim().toUpperCase();if(!fid || !supabaseClient)return;
-  await supabaseClient.from('group_members').insert({group_id:activeGroupId,user_id:fid,role:'member'});$('inviteFriendId').value='';alert('Gruba eklendi!');
-}
-async function leaveActiveGroup(){
-  if(supabaseClient)await supabaseClient.from('group_members').delete().eq('group_id',activeGroupId).eq('user_id',profile().friendId);
+function leaveActiveGroup(){
   leaveVoiceAndVideoChat();activeGroupId=null;$('activeGroupArea').style.display='none';loadGroupsData();
 }
-async function loadGroupMessages(){
-  if(!supabaseClient)return;
-  let {data}=await supabaseClient.from('group_messages').select('*').eq('group_id',activeGroupId).order('created_at',{ascending:true}).limit(100);
+function loadGroupMessages(){
+  let groups=get('odh_groups',[]);
+  let g=groups.find(x=>x.id===activeGroupId);if(!g)return;
   let box=$('groupChatBox');box.innerHTML='';
-  (data||[]).forEach(m=>{let d=document.createElement('div');d.className='msg';d.innerHTML=`<div class="msg-content"><small>${m.name}</small><div>${m.text}</div></div>`;box.append(d);});
+  (g.messages||[]).forEach(m=>{let d=document.createElement('div');d.className='msg';d.innerHTML=`<div class="msg-content"><small>${m.name}</small><div>${m.text}</div></div>`;box.append(d);});
 }
-async function sendGroupMessage(){
-  let text=$('groupMessageInput').value.trim();if(!text || !supabaseClient)return;let p=profile();
-  await supabaseClient.from('group_messages').insert({group_id:activeGroupId,user_id:p.friendId,name:p.name,avatar:p.avatar,text});
+function sendGroupMessage(){
+  let text=$('groupMessageInput').value.trim();if(!text)return;let p=profile();
+  let groups=get('odh_groups',[]);
+  let g=groups.find(x=>x.id===activeGroupId);
+  if(g){if(!g.messages)g.messages=[];g.messages.push({name:p.name,text});set('odh_groups',groups);}
   $('groupMessageInput').value='';loadGroupMessages();
 }
 
 async function joinVoiceAndVideoChat(){
-  if(!activeGroupId)return;
   try{
     localStream=await navigator.mediaDevices.getUserMedia({audio:true,video:true});
     $('voiceStatus').textContent='🟢 Mikrofon ve Kamera aktif!';$('btnJoinVoice').disabled=true;$('btnMuteVoice').disabled=false;$('btnToggleCam').disabled=false;$('btnLeaveVoice').disabled=false;
@@ -840,16 +744,9 @@ function toggleMuteVoice(){if(!localStream)return;isMuted=!isMuted;localStream.g
 function toggleGroupCamera(){if(!localStream)return;isCamOff=!isCamOff;localStream.getVideoTracks().forEach(t=>t.enabled=!isCamOff);$('btnToggleCam').textContent=isCamOff?'📷 Kamera Aç':'📷 Kamera Kapat';}
 function leaveVoiceAndVideoChat(){if(localStream){localStream.getTracks().forEach(t=>t.stop());localStream=null;}$('voiceStatus').textContent='Görüşme kapalı.';$('btnJoinVoice').disabled=false;$('btnMuteVoice').disabled=true;$('btnToggleCam').disabled=true;$('btnLeaveVoice').disabled=true;$('videoContainer').innerHTML='';}
 
-async function loadLeaderboard(){
-  let div=$('leaderboardList');div.innerHTML='';
-  let p=profile();
+function loadLeaderboard(){
+  let p=profile(), div=$('leaderboardList');
   div.innerHTML=`<div class="row" style="padding:10px;background:#1d1636;border-radius:10px"><span><b>#1 ${p.name}</b> (${p.className})</span><span style="color:var(--cyan);text-align:right">${p.friendId}</span></div>`;
-  if(supabaseClient){
-    try{
-      let {data}=await supabaseClient.from('profiles').select('*').limit(20);
-      if(data && data.length>0){div.innerHTML='';data.forEach((u,i)=>{let r=document.createElement('div');r.className='row';r.style.cssText='margin:8px 0;padding:8px 12px;background:#1d1636;border-radius:10px';r.innerHTML=`<span><b>#${i+1} ${u.name}</b> (${u.class_name||'6/B'})</span><span style="color:var(--cyan);text-align:right">${u.friend_id}</span>`;div.append(r);});}
-    }catch{}
-  }
 }
 
 function saveSettings(){
@@ -944,7 +841,7 @@ function startBreakoutGame(lvl){const c=$('canvas');if(!c)return;const ctx=c.get
 
 applyProfileToUI();
 renderGameList();
-initSupabase();
+loadAllChatMessages();
 </script>
 </body>
 </html>
