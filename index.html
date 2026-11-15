@@ -57,8 +57,8 @@ h2{text-align:center;color:#e9d5ff;text-shadow:0 0 12px var(--accent);margin-top
   background:var(--panel);backdrop-filter:blur(10px);padding:20px;
   text-align:center;box-shadow:0 8px 25px rgba(0,0,0,0.4);margin:15px 0;
 }
-.char-card{min-height:300px;border:2px solid var(--accent)}
-.char-card img{width:100%;height:210px;object-fit:contain}
+.char-card{min-height:260px;border:2px solid var(--accent);display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(145deg, #1b1233, #0e0a1f)}
+.char-art{font-size:55px;margin-bottom:12px;filter:drop-shadow(0 0 12px var(--cyan))}
 .salut-box{
   margin:20px 0;padding:20px 15px;background:linear-gradient(135deg, rgba(28,16,56,0.95), rgba(10,18,42,0.95));
   border:2px solid var(--cyan);border-radius:18px;box-shadow:0 0 25px rgba(0,234,255,0.3);text-align:center;
@@ -120,7 +120,7 @@ footer{text-align:center;padding:25px;color:var(--pink);font-weight:bold;letter-
 <header>
   <div class="logo">ODHMA GAMING</div>
   <div class="by">✦ BY OSMAN ✦</div>
-  <div class="subtitle">OYUN • CANLI AĞ SOHBETİ • ARKADAŞLIK • KAMERA</div>
+  <div class="subtitle">OYUN • CANLI AĞ SOHBETİ • MESAJ SİLME • GRUPLAR</div>
 </header>
 
 <nav id="mainNav">
@@ -143,12 +143,14 @@ footer{text-align:center;padding:25px;color:var(--pink);font-weight:bold;letter-
   
   <div class="characters">
     <div class="card char-card neighbor">
-      <img src="https://owp.klarna.com/product/640x640/1747089785/Hello-Neighbor-Steam-Key-Global.jpg?ph=true" alt="Hello Neighbor">
-      <h3>😈 HELLO NEIGHBOR</h3>
+      <div class="char-art">🏠🏃‍♂️</div>
+      <h3>HELLO NEIGHBOR</h3>
+      <p class="muted" style="font-size:12px;margin:4px 0 0">Gizli sırları çöz ve komşudan kaç!</p>
     </div>
     <div class="card char-card baldi">
-      <img src="https://geometrydashfullversion.io/data/image/game/baldi-s-basics/baldi-s-basics.png" alt="Baldi">
-      <h3>📏 BALDI'S BASICS</h3>
+      <div class="char-art">📏📐</div>
+      <h3>BALDI'S BASICS</h3>
+      <p class="muted" style="font-size:12px;margin:4px 0 0">Defterleri topla ve cetvelden kurtul!</p>
     </div>
   </div>
 
@@ -326,17 +328,30 @@ footer{text-align:center;padding:25px;color:var(--pink);font-weight:bold;letter-
 
 <!-- 7. GRUPLAR -->
 <section id="groups" class="page">
-  <h2>🛡️ GRUPLAR</h2>
+  <h2>🛡️ CANLI GRUPLAR</h2>
   <div class="panel">
     <h3>✨ Yeni Grup Kur</h3>
     <div class="formgrid">
-      <input id="newGroupName" placeholder="Grup Adı">
+      <input id="newGroupName" placeholder="Grup Adı (Örn: Osmanlar Ekibi)">
     </div>
-    <button onclick="createGroup()" style="margin-top:8px">Grup Kur</button>
+    <button onclick="createGroup()" style="margin-top:8px">Grup Kur ve Paylaş</button>
   </div>
+
   <div class="panel">
-    <h3>📂 Gruplarım</h3>
-    <div id="myGroupsList" class="muted">Henüz grubun yok.</div>
+    <h3>📂 Ağdaki Aktif Gruplar</h3>
+    <div id="myGroupsList" class="muted">Ağda aktif grup aranıyor...</div>
+  </div>
+
+  <div id="activeGroupArea" class="panel" style="display:none;border:2px solid var(--cyan)">
+    <div class="row" style="margin-bottom:10px">
+      <h3 id="activeGroupName" style="margin:0;color:var(--cyan)">Grup Adı</h3>
+      <button onclick="leaveGroup()" style="max-width:110px;background:#7f1d1d">🚪 Gruptan Çık</button>
+    </div>
+    <div id="groupChatBox" class="chatbox"></div>
+    <div class="row" style="margin-top:10px">
+      <input id="groupMessageInput" placeholder="Grup mesajı yaz..." onkeydown="if(event.key==='Enter')sendGroupMessage()">
+      <button onclick="sendGroupMessage()" style="max-width:130px">Gönder ➤</button>
+    </div>
   </div>
 </section>
 
@@ -385,8 +400,11 @@ function profile(){
 // ==========================================
 const TOPIC_CHAT = "odhma_gaming_osman_2026/chat";
 const TOPIC_SOCIAL = "odhma_gaming_osman_2026/social";
+const TOPIC_GROUPS = "odhma_gaming_osman_2026/groups";
 let mqttClient = null;
 let onlineUsers = {};
+let activeGroup = null;
+let liveGroups = {};
 
 function connectLiveNetwork(){
   const clientId = "odh_" + Math.random().toString(16).slice(2, 10);
@@ -402,9 +420,15 @@ function connectLiveNetwork(){
     try {
       const data = JSON.parse(message.payloadString);
       if(message.destinationName === TOPIC_CHAT){
-        receiveLiveMessage(data);
+        if(data.type === 'DELETE_MSG'){
+          removeLiveMessage(data.id);
+        } else {
+          receiveLiveMessage(data);
+        }
       } else if(message.destinationName === TOPIC_SOCIAL){
         handleSocialEvent(data);
+      } else if(message.destinationName === TOPIC_GROUPS){
+        handleGroupEvent(data);
       }
     } catch(e){}
   };
@@ -413,9 +437,10 @@ function connectLiveNetwork(){
     useSSL: true,
     onSuccess: () => {
       if($('netDot')) $('netDot').style.color = '#00ff88';
-      if($('connStatusText')) $('connStatusText').textContent = '🟢 Canlı Ağ Bağlı! (Herkes anlık görür)';
+      if($('connStatusText')) $('connStatusText').textContent = '🟢 Canlı Ağ Bağlı! (Mesaj silebilirsin)';
       mqttClient.subscribe(TOPIC_CHAT);
       mqttClient.subscribe(TOPIC_SOCIAL);
+      mqttClient.subscribe(TOPIC_GROUPS);
       announcePresence();
       setInterval(announcePresence, 15000);
     },
@@ -470,6 +495,18 @@ function handleSocialEvent(data){
   }
 }
 
+function handleGroupEvent(data){
+  if(data.type === 'GROUP_CREATE'){
+    liveGroups[data.groupId] = { name: data.name, messages: [] };
+    if($('groups').classList.contains('active')) loadGroups();
+  }
+  else if(data.type === 'GROUP_MSG' && activeGroup === data.groupId){
+    if(!liveGroups[activeGroup]) liveGroups[activeGroup] = { messages: [] };
+    liveGroups[activeGroup].messages.push(data.msg);
+    renderGroupChat();
+  }
+}
+
 function receiveLiveMessage(msg){
   let msgs = get('odh_live_chat', []);
   if(msgs.some(m => m.id === msg.id)) return;
@@ -478,6 +515,19 @@ function receiveLiveMessage(msg){
   set('odh_live_chat', msgs);
   renderChat(msgs);
   if(msg.senderId !== profile().friendId) playBeep(600, 0.05);
+}
+
+function removeLiveMessage(id){
+  let msgs = get('odh_live_chat', []);
+  msgs = msgs.filter(m => m.id !== id);
+  set('odh_live_chat', msgs);
+  if($('chat').classList.contains('active')) renderChat(msgs);
+}
+
+function deleteMessage(id){
+  removeLiveMessage(id);
+  publishPacket(TOPIC_CHAT, { type: 'DELETE_MSG', id: id });
+  playBeep(350, 0.06);
 }
 
 function go(page){
@@ -495,12 +545,24 @@ function go(page){
 function renderChat(msgs){
   const box=$('chatbox');if(!box)return;
   box.innerHTML='';
+  const p = profile();
   if(msgs.length===0){box.innerHTML='<div class="muted" style="text-align:center;padding:25px">Canlı sohbete hoş geldin! İlk mesajı gönder 👇</div>';return;}
   msgs.forEach(m=>{
     const d=document.createElement('div');d.className='msg';
-    const img=document.createElement('img');img.className='msg-avatar';img.src=defaultAvatarSVG;
+    const img=document.createElement('img');img.className='msg-avatar';img.src=m.avatar||defaultAvatarSVG;
     const content=document.createElement('div');content.className='msg-content';
-    const s=document.createElement('small');s.textContent=`${m.name} (${m.senderId}) • ${m.className} • ${new Date(m.time).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'})}`;
+    const s=document.createElement('small');
+    s.textContent=`${m.name} (${m.senderId}) • ${m.className} • ${new Date(m.time).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'})}`;
+    
+    // Kendi mesajına Sil butonu ekle
+    if(m.senderId === p.friendId){
+      const delBtn = document.createElement('button');
+      delBtn.textContent = '🗑️ Sil';
+      delBtn.style.cssText = 'background:#7f1d1d;padding:2px 6px;font-size:10px;margin-left:8px;border-radius:6px;border:none;cursor:pointer;color:#fff;';
+      delBtn.onclick = () => deleteMessage(m.id);
+      s.appendChild(delBtn);
+    }
+
     const t=document.createElement('div');t.textContent=m.text;
     content.append(s,t);d.append(img,content);
     box.append(d);
@@ -516,6 +578,7 @@ function sendMessage(){
     senderId: p.friendId,
     name: p.name,
     className: p.className,
+    avatar: p.avatar,
     text: text,
     time: Date.now()
   };
@@ -531,7 +594,7 @@ function clearChatHistory(){
 }
 
 // ==========================================
-// ARKADAŞ SİSTEMİ
+// ARKADAŞLIK & GRUP SİSTEMİ
 // ==========================================
 function updateFriendBadge(){
   const reqs = get('odh_reqs', []);
@@ -558,7 +621,7 @@ function sendFriendRequest(){
     toId: targetId
   });
   $('addFriendInput').value = '';
-  $('friendRequestStatus').textContent = '✅ Canlı arkadaşlık isteği gönderildi! Karşı taraf onayladığında listene eklenecek.';
+  $('friendRequestStatus').textContent = '✅ Canlı arkadaşlık isteği gönderildi!';
 }
 
 function acceptFriend(fromId, fromName){
@@ -611,8 +674,79 @@ function loadFriends(){
   });
 }
 
+function createGroup(){
+  const name = $('newGroupName').value.trim();
+  if(!name) return;
+  const groupId = 'g_' + Math.random().toString(36).slice(2,8);
+  liveGroups[groupId] = { name: name, messages: [] };
+  publishPacket(TOPIC_GROUPS, { type: 'GROUP_CREATE', groupId, name });
+  $('newGroupName').value = '';
+  openGroup(groupId);
+}
+
+function loadGroups(){
+  const div = $('myGroupsList');
+  div.innerHTML = Object.keys(liveGroups).length === 0 ? 'Ağda henüz aktif grup yok.' : '';
+  Object.entries(liveGroups).forEach(([id, g]) => {
+    const row = document.createElement('div');
+    row.className = 'row';
+    row.style.margin = '6px 0';
+    row.innerHTML = `<b>🛡️ ${g.name}</b>`;
+    const btn = document.createElement('button');
+    btn.textContent = 'Gruba Gir ➤';
+    btn.style.maxWidth = '130px';
+    btn.onclick = () => openGroup(id);
+    row.append(btn);
+    div.append(row);
+  });
+}
+
+function openGroup(id){
+  activeGroup = id;
+  $('activeGroupName').textContent = liveGroups[id].name;
+  $('activeGroupArea').style.display = 'block';
+  renderGroupChat();
+}
+
+function leaveGroup(){
+  activeGroup = null;
+  $('activeGroupArea').style.display = 'none';
+  loadGroups();
+}
+
+function renderGroupChat(){
+  if(!activeGroup || !liveGroups[activeGroup]) return;
+  const box = $('groupChatBox');
+  box.innerHTML = '';
+  const msgs = liveGroups[activeGroup].messages;
+  if(msgs.length === 0){
+    box.innerHTML = '<div class="muted" style="text-align:center;padding:20px">Grup sohbeti boş. İlk mesajı yaz!</div>';
+    return;
+  }
+  msgs.forEach(m => {
+    const d = document.createElement('div');
+    d.className = 'msg';
+    d.innerHTML = `<div class="msg-content"><small>${m.name} • ${new Date(m.time).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'})}</small><div>${m.text}</div></div>`;
+    box.append(d);
+  });
+  box.scrollTop = box.scrollHeight;
+}
+
+function sendGroupMessage(){
+  const input = $('groupMessageInput');
+  const text = input.value.trim();
+  if(!text || !activeGroup) return;
+  const p = profile();
+  const msg = { name: p.name, text: text, time: Date.now() };
+  if(!liveGroups[activeGroup].messages) liveGroups[activeGroup].messages = [];
+  liveGroups[activeGroup].messages.push(msg);
+  publishPacket(TOPIC_GROUPS, { type: 'GROUP_MSG', groupId: activeGroup, msg });
+  input.value = '';
+  renderGroupChat();
+}
+
 // ==========================================
-// KAMERA, PROFİL & DİĞERLERİ
+// KAMERA & PROFİL & OYUNLAR
 // ==========================================
 let studioStream=null, lastCapturedDataUrl='', selectedSticker='';
 async function startStudioCamera(){
@@ -657,16 +791,6 @@ function applyProfileToUI(){
   document.documentElement.style.setProperty('--accent',p.color||'#a855f7');
 }
 function copyMyId(){navigator.clipboard.writeText(profile().friendId);alert('ID Kopyalandı: '+profile().friendId);}
-
-function loadGroups(){
-  const groups=get('odh_groups',[]);const div=$('myGroupsList');div.innerHTML=groups.length===0?'Henüz grup yok.':'';
-  groups.forEach(g=>{let r=document.createElement('div');r.style.margin='5px 0';r.innerHTML=`<b>🛡️ ${g.name}</b>`;div.append(r);});
-}
-function createGroup(){
-  const name=$('newGroupName').value.trim();if(!name)return;
-  let groups=get('odh_groups',[]);groups.push({name});set('odh_groups',groups);
-  $('newGroupName').value='';loadGroups();
-}
 
 function loadLeaderboard(){
   const p=profile();
