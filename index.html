@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ODHMA GAMING - BY OSMAN</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
 <style>
 :root{
   --accent:#a855f7;
@@ -74,7 +75,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--cyan);box-shadow:0 0 
 textarea{min-height:75px;resize:vertical}
 .formgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;text-align:left}
 .chatbox{height:340px;overflow-y:auto;background:rgba(9, 7, 22, 0.94);border:1px solid #58347d;border-radius:14px;padding:12px;text-align:left}
-.msg{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;background:linear-gradient(135deg, #21173b, #19122e);border:1px solid rgba(168,85,247,0.3);border-radius:12px;margin:8px 0;word-break:break-all}
+.msg{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;background:linear-gradient(135deg, #21173b, #19122e);border:1px solid rgba(168,85,247,0.3);border-radius:12px;margin:8px 0;word-break:break-word}
 .msg-avatar{width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid var(--accent);flex-shrink:0}
 .msg-content{flex:1}
 .msg small{display:block;color:#c5a5e8;margin-bottom:3px;font-size:11px}
@@ -119,13 +120,13 @@ footer{text-align:center;padding:25px;color:var(--pink);font-weight:bold;letter-
 <header>
   <div class="logo">ODHMA GAMING</div>
   <div class="by">✦ BY OSMAN ✦</div>
-  <div class="subtitle">OYUN • BULUT SOHBET • ARKADAŞLIK • KAMERA</div>
+  <div class="subtitle">OYUN • CANLI AĞ SOHBETİ • ARKADAŞLIK • KAMERA</div>
 </header>
 
 <nav id="mainNav">
   <button class="nav-btn active" data-page="home" onclick="go('home')">🏠 Ana Sayfa</button>
   <button class="nav-btn" data-page="games" onclick="go('games')">🎮 Oyunlar (50)</button>
-  <button class="nav-btn" data-page="chat" onclick="go('chat')">💬 Bulut Sohbet <span id="cloudStatus" style="font-size:10px;color:#00ff88">●</span></button>
+  <button class="nav-btn" data-page="chat" onclick="go('chat')">💬 Canlı Sohbet <span id="netDot" style="color:#ff3c9d">●</span></button>
   <button class="nav-btn" data-page="camera" onclick="go('camera')">📷 Kamera</button>
   <button class="nav-btn" data-page="profile" onclick="go('profile')">👤 Profilim</button>
   <button class="nav-btn" data-page="friends" onclick="go('friends')">👥 Arkadaşlar <span id="friendBadge" class="badge" style="display:none">0</span></button>
@@ -138,7 +139,7 @@ footer{text-align:center;padding:25px;color:var(--pink);font-weight:bold;letter-
 <!-- 1. ANA SAYFA -->
 <section id="home" class="page active">
   <h2>🔥 ODHMA DÜNYASINA HOŞ GELDİN!</h2>
-  <p class="muted" style="text-align:center">Eğlence, rekabet ve ortak bulut sohbet tek bir yerde!</p>
+  <p class="muted" style="text-align:center">Eğlence, rekabet ve gerçek zamanlı sohbet tek bir yerde!</p>
   
   <div class="characters">
     <div class="card char-card neighbor">
@@ -205,13 +206,13 @@ footer{text-align:center;padding:25px;color:var(--pink);font-weight:bold;letter-
   <div id="gameGrid" class="game-grid"></div>
 </section>
 
-<!-- 3. SOHBET -->
+<!-- 3. CANLI SOHBET -->
 <section id="chat" class="page">
-  <h2>💬 ODHMA ORTAK BULUT SOHBETİ</h2>
+  <h2>💬 ODHMA GERÇEK ZAMANLI SOHBET</h2>
   <div class="panel">
     <div class="row" style="margin-bottom:8px;justify-content:space-between">
-      <span class="muted" style="text-align:left">🟢 Herkes aynı anda görebilir</span>
-      <button onclick="loadCloudChat()" style="max-width:140px;padding:5px 8px;font-size:11px;background:#1e3a8a">🔄 Yenile</button>
+      <span id="connStatusText" class="muted" style="text-align:left">🟡 Canlı ağa bağlanıyor...</span>
+      <button onclick="clearChatHistory()" style="max-width:140px;padding:5px 8px;font-size:11px;background:#4a1525">🗑️ Ekranı Temizle</button>
     </div>
     <div id="chatbox" class="chatbox"></div>
     <div class="row" style="margin-top:10px">
@@ -304,14 +305,18 @@ footer{text-align:center;padding:25px;color:var(--pink);font-weight:bold;letter-
 
 <!-- 6. ARKADAŞLAR -->
 <section id="friends" class="page">
-  <h2>👥 ARKADAŞLAR</h2>
+  <h2>👥 CANLI ARKADAŞLIK SİSTEMİ</h2>
   <div class="panel">
-    <h3>➕ Arkadaş Ekle</h3>
+    <h3>➕ ID ile Arkadaş İsteği Gönder</h3>
     <div class="row">
       <input id="addFriendInput" placeholder="Arkadaş ID gir (Örn: OSM#12345)">
-      <button onclick="sendFriendRequest()" style="max-width:160px">Ekle</button>
+      <button onclick="sendFriendRequest()" style="max-width:160px">İstek Gönder</button>
     </div>
     <p id="friendRequestStatus" class="muted"></p>
+  </div>
+  <div class="panel">
+    <h3>🔔 Gelen İstekler</h3>
+    <div id="incomingRequestsList" class="muted">Gelen istek yok.</div>
   </div>
   <div class="panel">
     <h3>🤝 Arkadaş Listem</h3>
@@ -337,9 +342,9 @@ footer{text-align:center;padding:25px;color:var(--pink);font-weight:bold;letter-
 
 <!-- 8. LİDERLİK -->
 <section id="leader" class="page">
-  <h2>🏆 LİDERLİK TABLOSU</h2>
+  <h2>🏆 ÇEVRİMİÇİ OYUNCULAR</h2>
   <div class="panel">
-    <div id="leaderboardList" class="muted">Yükleniyor...</div>
+    <div id="leaderboardList" class="muted">Ağdaki oyuncular bekleniyor...</div>
   </div>
 </section>
 
@@ -365,13 +370,6 @@ const set=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}};
 
 const defaultAvatarSVG='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="90" height="90"><rect width="100%" height="100%" fill="%232b1f47"/><text x="50%" y="56%" text-anchor="middle" fill="%2300eaff" font-family="Arial" font-weight="bold" font-size="34">O</text></svg>';
 
-function getDeviceId(){
-  let id=localStorage.getItem('odh_device');
-  if(!id){id='dev-'+Math.random().toString(36).slice(2)+Date.now().toString(36);localStorage.setItem('odh_device',id);}
-  return id;
-}
-const myDeviceId=getDeviceId();
-
 function profile(){
   let p=get('odh_profile',null);
   if(!p || !p.friendId){
@@ -382,46 +380,127 @@ function profile(){
   return p;
 }
 
+// ==========================================
+// GERÇEK ZAMANLI CANLI AĞ (MQTT WEBSOCKET)
+// ==========================================
+const TOPIC_CHAT = "odhma_gaming_osman_2026/chat";
+const TOPIC_SOCIAL = "odhma_gaming_osman_2026/social";
+let mqttClient = null;
+let onlineUsers = {};
+
+function connectLiveNetwork(){
+  const clientId = "odh_" + Math.random().toString(16).slice(2, 10);
+  mqttClient = new Paho.MQTT.Client("broker.hivemq.com", 8884, "/mqtt", clientId);
+
+  mqttClient.onConnectionLost = () => {
+    if($('netDot')) $('netDot').style.color = '#ff3c9d';
+    if($('connStatusText')) $('connStatusText').textContent = '🔴 Bağlantı koptu, yeniden bağlanılıyor...';
+    setTimeout(connectLiveNetwork, 3000);
+  };
+
+  mqttClient.onMessageArrived = (message) => {
+    try {
+      const data = JSON.parse(message.payloadString);
+      if(message.destinationName === TOPIC_CHAT){
+        receiveLiveMessage(data);
+      } else if(message.destinationName === TOPIC_SOCIAL){
+        handleSocialEvent(data);
+      }
+    } catch(e){}
+  };
+
+  mqttClient.connect({
+    useSSL: true,
+    onSuccess: () => {
+      if($('netDot')) $('netDot').style.color = '#00ff88';
+      if($('connStatusText')) $('connStatusText').textContent = '🟢 Canlı Ağ Bağlı! (Herkes anlık görür)';
+      mqttClient.subscribe(TOPIC_CHAT);
+      mqttClient.subscribe(TOPIC_SOCIAL);
+      announcePresence();
+      setInterval(announcePresence, 15000);
+    },
+    onFailure: () => {
+      setTimeout(connectLiveNetwork, 4000);
+    }
+  });
+}
+
+function publishPacket(topic, obj){
+  if(mqttClient && mqttClient.isConnected()){
+    const msg = new Paho.MQTT.Message(JSON.stringify(obj));
+    msg.destinationName = topic;
+    mqttClient.send(msg);
+  }
+}
+
+function announcePresence(){
+  const p = profile();
+  publishPacket(TOPIC_SOCIAL, {
+    type: 'HELLO',
+    friendId: p.friendId,
+    name: p.name,
+    className: p.className
+  });
+}
+
+function handleSocialEvent(data){
+  const p = profile();
+  if(data.type === 'HELLO'){
+    onlineUsers[data.friendId] = { name: data.name, className: data.className, lastSeen: Date.now() };
+    if($('leader').classList.contains('active')) loadLeaderboard();
+  }
+  else if(data.type === 'FRIEND_REQ' && data.toId === p.friendId){
+    let reqs = get('odh_reqs', []);
+    if(!reqs.some(r => r.fromId === data.fromId)){
+      reqs.push({ fromId: data.fromId, fromName: data.fromName });
+      set('odh_reqs', reqs);
+      updateFriendBadge();
+      playBeep(820, 0.1);
+      if($('friends').classList.contains('active')) loadFriends();
+    }
+  }
+  else if(data.type === 'FRIEND_ACCEPT' && data.toId === p.friendId){
+    let friends = get('odh_friends', []);
+    if(!friends.some(f => f.id === data.fromId)){
+      friends.push({ id: data.fromId, name: data.fromName });
+      set('odh_friends', friends);
+      playBeep(900, 0.1);
+      if($('friends').classList.contains('active')) loadFriends();
+    }
+  }
+}
+
+function receiveLiveMessage(msg){
+  let msgs = get('odh_live_chat', []);
+  if(msgs.some(m => m.id === msg.id)) return;
+  msgs.push(msg);
+  if(msgs.length > 100) msgs.shift();
+  set('odh_live_chat', msgs);
+  renderChat(msgs);
+  if(msg.senderId !== profile().friendId) playBeep(600, 0.05);
+}
+
 function go(page){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   $(page).classList.add('active');
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active', b.dataset.page===page));
   if(page!=='camera')stopStudioCamera();
-  if(page==='chat')loadCloudChat();
+  if(page==='chat')renderChat(get('odh_live_chat', []));
   if(page==='profile')applyProfileToUI();
   if(page==='friends')loadFriends();
   if(page==='groups')loadGroups();
   if(page==='leader')loadLeaderboard();
 }
 
-// Bulut Senkronizasyon Altyapısı (Public JSON Bin)
-const CLOUD_BIN_URL = "https://jsonblob.com/api/jsonBlob/1346800000000000000";
-
-async function loadCloudChat(){
-  try {
-    let res = await fetch('https://api.jsonbin.io/v3/b/67c5277ead19ca34f81423de', {
-      headers: { 'X-Master-Key': '$2a$10$C8qQxY... (public)' }
-    });
-    // Fallback olarak localStorage + public sync
-  } catch(e){}
-  
-  // Güvenli ve hızlı ortak bulut havuzu simülasyonu
-  let msgs = get('odh_cloud_chat', [
-    {name:'Osman', className:'6/B', text:'ODHMA Gaming açıldı! Herkese selamlarr 🔥', time:Date.now()-10000},
-    {name:'Hüseyin', className:'6/A', text:'Oyunlar efsane olmuş eline sağlık!', time:Date.now()-5000}
-  ]);
-  renderChat(msgs);
-}
-
 function renderChat(msgs){
   const box=$('chatbox');if(!box)return;
   box.innerHTML='';
-  if(msgs.length===0){box.innerHTML='<div class="muted" style="text-align:center;padding:25px">Henüz mesaj yok. İlk mesajı sen yaz!</div>';return;}
+  if(msgs.length===0){box.innerHTML='<div class="muted" style="text-align:center;padding:25px">Canlı sohbete hoş geldin! İlk mesajı gönder 👇</div>';return;}
   msgs.forEach(m=>{
     const d=document.createElement('div');d.className='msg';
-    const img=document.createElement('img');img.className='msg-avatar';img.src=m.avatar||defaultAvatarSVG;
+    const img=document.createElement('img');img.className='msg-avatar';img.src=defaultAvatarSVG;
     const content=document.createElement('div');content.className='msg-content';
-    const s=document.createElement('small');s.textContent=`${m.name} • ${m.className} • ${new Date(m.time).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'})}`;
+    const s=document.createElement('small');s.textContent=`${m.name} (${m.senderId}) • ${m.className} • ${new Date(m.time).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'})}`;
     const t=document.createElement('div');t.textContent=m.text;
     content.append(s,t);d.append(img,content);
     box.append(d);
@@ -432,24 +511,109 @@ function renderChat(msgs){
 function sendMessage(){
   const input=$('message');const text=input.value.trim();if(!text)return;
   const p=profile();
-  let msgs=get('odh_cloud_chat',[]);
-  msgs.push({name:p.name,className:p.className,avatar:p.avatar,text:text,time:Date.now()});
-  if(msgs.length>100)msgs.shift();
-  set('odh_cloud_chat',msgs);input.value='';loadCloudChat();playBeep(680,0.06);
+  const packet = {
+    id: 'msg_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
+    senderId: p.friendId,
+    name: p.name,
+    className: p.className,
+    text: text,
+    time: Date.now()
+  };
+  input.value='';
+  receiveLiveMessage(packet);
+  publishPacket(TOPIC_CHAT, packet);
+  playBeep(680,0.06);
 }
 
 function clearChatHistory(){
-  if(!confirm('Sohbeti temizlemek istiyor musun?'))return;
-  set('odh_cloud_chat',[]);loadCloudChat();
+  if(!confirm('Sohbet ekranını temizlemek istiyor musun?'))return;
+  set('odh_live_chat',[]);renderChat([]);
 }
 
-// Otomatik Canlı Senkronizasyon Döngüsü (Her 3 saniyede bir sohbeti yeniler)
-setInterval(()=>{
-  if($('chat').classList.contains('active')){
-    loadCloudChat();
+// ==========================================
+// ARKADAŞ SİSTEMİ
+// ==========================================
+function updateFriendBadge(){
+  const reqs = get('odh_reqs', []);
+  const badge = $('friendBadge');
+  if(reqs.length > 0){
+    badge.style.display = 'inline-block';
+    badge.textContent = reqs.length;
+  } else {
+    badge.style.display = 'none';
   }
-}, 3000);
+}
 
+function sendFriendRequest(){
+  const targetId = $('addFriendInput').value.trim().toUpperCase();
+  const p = profile();
+  if(!targetId || targetId === p.friendId){
+    $('friendRequestStatus').textContent = '⚠️ Geçerli bir arkadaş ID gir!';
+    return;
+  }
+  publishPacket(TOPIC_SOCIAL, {
+    type: 'FRIEND_REQ',
+    fromId: p.friendId,
+    fromName: p.name,
+    toId: targetId
+  });
+  $('addFriendInput').value = '';
+  $('friendRequestStatus').textContent = '✅ Canlı arkadaşlık isteği gönderildi! Karşı taraf onayladığında listene eklenecek.';
+}
+
+function acceptFriend(fromId, fromName){
+  const p = profile();
+  let reqs = get('odh_reqs', []).filter(r => r.fromId !== fromId);
+  set('odh_reqs', reqs);
+
+  let friends = get('odh_friends', []);
+  if(!friends.some(f => f.id === fromId)){
+    friends.push({ id: fromId, name: fromName });
+    set('odh_friends', friends);
+  }
+
+  publishPacket(TOPIC_SOCIAL, {
+    type: 'FRIEND_ACCEPT',
+    fromId: p.friendId,
+    fromName: p.name,
+    toId: fromId
+  });
+
+  updateFriendBadge();
+  loadFriends();
+}
+
+function loadFriends(){
+  const reqs = get('odh_reqs', []);
+  const reqDiv = $('incomingRequestsList');
+  reqDiv.innerHTML = reqs.length === 0 ? 'Gelen istek yok.' : '';
+  reqs.forEach(r => {
+    const row = document.createElement('div');
+    row.className = 'row';
+    row.style.margin = '6px 0';
+    row.innerHTML = `<span><b>${r.fromName}</b> (${r.fromId})</span>`;
+    const btn = document.createElement('button');
+    btn.textContent = '✅ Kabul Et';
+    btn.style.maxWidth = '130px';
+    btn.onclick = () => acceptFriend(r.fromId, r.fromName);
+    row.append(btn);
+    reqDiv.append(row);
+  });
+
+  const list = get('odh_friends', []);
+  const div = $('friendsList');
+  div.innerHTML = list.length === 0 ? 'Henüz arkadaşın yok.' : '';
+  list.forEach(f => {
+    let r = document.createElement('div');
+    r.style.margin = '6px 0';
+    r.innerHTML = `<b>🤝 ${f.name}</b> <span class="muted">(${f.id})</span>`;
+    div.append(r);
+  });
+}
+
+// ==========================================
+// KAMERA, PROFİL & DİĞERLERİ
+// ==========================================
 let studioStream=null, lastCapturedDataUrl='', selectedSticker='';
 async function startStudioCamera(){
   try{
@@ -486,23 +650,13 @@ function stopStudioCamera(){
 function saveProfile(){
   const name=$('profileName').value.trim();if(!name){alert('Ad girin.');return;}
   const p=profile();p.name=name;p.className=$('profileClass').value;p.bio=$('bio').value;p.color=$('profileColor').value;p.avatar=$('avatarUrl').value.trim();
-  set('odh_profile',p);$('profileStatus').textContent='✅ Kaydedildi!';applyProfileToUI();
+  set('odh_profile',p);$('profileStatus').textContent='✅ Kaydedildi!';applyProfileToUI();announcePresence();
 }
 function applyProfileToUI(){
   const p=profile();$('profileName').value=p.name;$('profileClass').value=p.className;$('bio').value=p.bio;$('profileColor').value=p.color;$('avatarUrl').value=p.avatar;$('myFriendIdDisplay').textContent=p.friendId;$('avatarPreview').src=p.avatar||defaultAvatarSVG;
   document.documentElement.style.setProperty('--accent',p.color||'#a855f7');
 }
-function copyMyId(){navigator.clipboard.writeText(profile().friendId);alert('ID Kopyalandı!');}
-
-function loadFriends(){
-  const list=get('odh_friends',[]);const div=$('friendsList');div.innerHTML=list.length===0?'Henüz arkadaşın yok.':'';
-  list.forEach(f=>{let r=document.createElement('div');r.style.margin='5px 0';r.innerHTML=`<b>🤝 ${f}</b>`;div.append(r);});
-}
-function sendFriendRequest(){
-  const id=$('addFriendInput').value.trim().toUpperCase();if(!id)return;
-  let list=get('odh_friends',[]);if(!list.includes(id)){list.push(id);set('odh_friends',list);}
-  $('addFriendInput').value='';$('friendRequestStatus').textContent='✅ Arkadaş eklendi!';loadFriends();
-}
+function copyMyId(){navigator.clipboard.writeText(profile().friendId);alert('ID Kopyalandı: '+profile().friendId);}
 
 function loadGroups(){
   const groups=get('odh_groups',[]);const div=$('myGroupsList');div.innerHTML=groups.length===0?'Henüz grup yok.':'';
@@ -515,7 +669,12 @@ function createGroup(){
 }
 
 function loadLeaderboard(){
-  const p=profile();$('leaderboardList').innerHTML=`<div class="row" style="padding:8px;background:#1d1636;border-radius:8px"><span><b>#1 ${p.name}</b> (${p.className})</span><span style="color:var(--cyan);text-align:right">${p.friendId}</span></div>`;
+  const p=profile();
+  onlineUsers[p.friendId] = { name: p.name, className: p.className, lastSeen: Date.now() };
+  const div=$('leaderboardList');div.innerHTML='';
+  Object.entries(onlineUsers).forEach(([id, u], i)=>{
+    div.innerHTML += `<div class="row" style="padding:8px;margin:5px 0;background:#1d1636;border-radius:8px"><span><b>#${i+1} ${u.name}</b> (${u.className})</span><span style="color:var(--cyan);text-align:right">${id}</span></div>`;
+  });
 }
 function saveSettings(){
   set('odh_sound',$('sound').checked);$('settingsStatus').textContent='✅ Kaydedildi.';
@@ -607,7 +766,8 @@ function startBreakoutGame(lvl){const c=$('canvas');if(!c)return;const ctx=c.get
 
 applyProfileToUI();
 renderGameList();
-loadCloudChat();
+updateFriendBadge();
+connectLiveNetwork();
 </script>
 </body>
 </html>
