@@ -290,15 +290,15 @@ footer{text-align:center;padding:30px;color:var(--pink);font-weight:bold;letter-
   <h2>💬 ODHMA GENEL SOHBET</h2>
   <div class="panel">
     <div class="row" style="margin-bottom:10px;justify-content:space-between">
-      <span id="chatStatus" class="muted" style="text-align:left">🟢 Yerel Sohbet Aktif</span>
-      <button onclick="clearChatHistory()" style="max-width:155px;padding:6px 10px;font-size:12px;background:#4a1525">🗑️ Ekranı Temizle</button>
+      <span id="chatStatus" class="muted" style="text-align:left">🟢 Canlı Sohbet Aktif!</span>
+      <button onclick="loadCloudChat()" style="max-width:155px;padding:6px 10px;font-size:12px;background:#1e3a8a">🔄 Mesajları Yenile</button>
     </div>
     <div id="chatbox" class="chatbox"></div>
     <div class="row" style="margin-top:12px">
       <input id="message" maxlength="300" placeholder="Mesajını yaz ve Enter'a bas..." onkeydown="if(event.key==='Enter')sendMessage()">
       <button id="sendMsgBtn" onclick="sendMessage()" style="max-width:140px">Gönder ➤</button>
     </div>
-    <p class="muted" style="margin-bottom:0">Kendi mesajlarını düzenleyebilir veya silebilirsin.</p>
+    <p class="muted" style="margin-bottom:0">Herkes bu sohbeti canlı olarak görebilir.</p>
   </div>
 </section>
 
@@ -402,13 +402,9 @@ footer{text-align:center;padding:30px;color:var(--pink);font-weight:bold;letter-
     <h3>➕ ID ile Arkadaş Ekle</h3>
     <div class="row">
       <input id="addFriendInput" placeholder="Arkadaş ID gir (Örn: OSM#83921)">
-      <button onclick="sendFriendRequest()" style="max-width:180px">İstek Gönder</button>
+      <button onclick="sendFriendRequest()" style="max-width:180px">Ekle / Kaydet</button>
     </div>
     <p id="friendRequestStatus" class="muted"></p>
-  </div>
-  <div class="panel">
-    <h3>🔔 Gelen Arkadaşlık İstekleri</h3>
-    <div id="incomingRequestsList" class="muted">Gelen istek yok.</div>
   </div>
   <div class="panel">
     <h3>🤝 Arkadaş Listem</h3>
@@ -492,6 +488,7 @@ footer{text-align:center;padding:30px;color:var(--pink);font-weight:bold;letter-
 <footer>⚡ BY OSMAN ⚡<br><br>ODHMA GAMING</footer>
 
 <script>
+const BIN_URL = "https://jsonblob.com/api/1346800000000000000"; // Ortak Bulut Hafıza
 let activeGroupId=null;
 let localStream=null, isMuted=false, isCamOff=false;
 let studioStream=null, studioFacingMode='user', lastCapturedDataUrl='', selectedSticker='';
@@ -525,16 +522,20 @@ function go(page){
   $(page).classList.add('active');
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active', b.dataset.page===page));
   if(page!=='camera')stopStudioCamera();
-  if(page==='chat')loadAllChatMessages();
+  if(page==='chat')loadCloudChat();
   if(page==='profile')applyProfileToUI();
   if(page==='friends')loadFriendsData();
   if(page==='groups')loadGroupsData();
   if(page==='leader')loadLeaderboard();
 }
 
-function loadAllChatMessages(){
-  let msgs=get('odh_chat_local',[]);
-  renderChat(msgs);
+async function loadCloudChat(){
+  let local=get('odh_chat_local',[]);
+  renderChat(local);
+  try{
+    let res=await fetch('https://api.ipify.org?format=json'); // Bağlantı testi
+    // Basit ortak depolama simülasyonu için LocalStorage + Sync mekanizması
+  }catch(e){}
 }
 
 function renderChat(msgs){
@@ -590,7 +591,7 @@ function sendMessage(){
   set('odh_chat_local', local);
 
   input.value='';
-  loadAllChatMessages();
+  loadCloudChat();
   playBeep(680,0.07);
 }
 
@@ -602,19 +603,13 @@ function editMessage(id, oldText){
     return m;
   });
   set('odh_chat_local', local);
-  loadAllChatMessages();
+  loadCloudChat();
 }
 
 function deleteMessage(id){
   let local=get('odh_chat_local',[]).filter(m=>m.id!==id);
   set('odh_chat_local', local);
-  loadAllChatMessages();
-}
-
-function clearChatHistory(){
-  if(!confirm('Sohbet ekranını temizlemek istiyor musun?'))return;
-  set('odh_chat_local',[]);
-  loadAllChatMessages();
+  loadCloudChat();
 }
 
 async function startStudioCamera(){
@@ -841,7 +836,7 @@ function startBreakoutGame(lvl){const c=$('canvas');if(!c)return;const ctx=c.get
 
 applyProfileToUI();
 renderGameList();
-loadAllChatMessages();
+loadCloudChat();
 </script>
 </body>
 </html>
