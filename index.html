@@ -57,7 +57,7 @@ h2{text-align:center;color:#e9d5ff;text-shadow:0 0 12px var(--accent);margin-top
   background:var(--panel);backdrop-filter:blur(10px);padding:20px;
   text-align:center;box-shadow:0 8px 25px rgba(0,0,0,0.4);margin:15px 0;
 }
-.char-card{min-height:260px;border:2px solid var(--accent);display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(145deg, #1b1233, #0e0a1f)}
+.char-card{min-height:240px;border:2px solid var(--accent);display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(145deg, #1b1233, #0e0a1f)}
 .char-art{font-size:55px;margin-bottom:12px;filter:drop-shadow(0 0 12px var(--cyan))}
 .salut-box{
   margin:20px 0;padding:20px 15px;background:linear-gradient(135deg, rgba(28,16,56,0.95), rgba(10,18,42,0.95));
@@ -111,6 +111,15 @@ textarea{min-height:75px;resize:vertical}
 .sticker-bar{display:flex;justify-content:center;gap:6px;margin:6px 0;flex-wrap:wrap}
 .sticker-btn{background:#1f1338;border:1px solid var(--accent);padding:5px 10px;border-radius:8px;cursor:pointer;font-size:16px}
 .sticker-btn.active{border-color:var(--cyan);background:#381d6e}
+
+/* MINECRAFT STİLLERİ */
+.mc-skin-card{border:2px solid var(--accent);border-radius:14px;padding:12px;cursor:pointer;background:#16102b;transition:.2s}
+.mc-skin-card.selected{border-color:#00ff88;background:#1b2e26;box-shadow:0 0 15px rgba(0,255,136,0.4)}
+.mc-hotbar{display:flex;gap:8px;justify-content:center;margin:10px 0;flex-wrap:wrap}
+.mc-slot{padding:8px 12px;border:2px solid #555;border-radius:8px;cursor:pointer;font-size:12px;font-weight:bold;background:#1a1a2e}
+.mc-slot.active{border-color:var(--cyan);background:#2d1b4e;box-shadow:0 0 10px var(--cyan)}
+#mcCanvas{background:linear-gradient(180deg, #38bdf8 0%, #bae6fd 100%);border:3px solid #22c55e;border-radius:12px;cursor:crosshair;max-width:100%}
+
 footer{text-align:center;padding:25px;color:var(--pink);font-weight:bold;letter-spacing:2px}
 @media(max-width:600px){.characters,.game-tools{grid-template-columns:1fr}.row{flex-direction:column}}
 </style>
@@ -120,11 +129,12 @@ footer{text-align:center;padding:25px;color:var(--pink);font-weight:bold;letter-
 <header>
   <div class="logo">ODHMA GAMING</div>
   <div class="by">✦ BY OSMAN ✦</div>
-  <div class="subtitle">OYUN • SOHBET • GÖRÜNTÜLÜ ARAMA • GRUPLAR</div>
+  <div class="subtitle">OYUN • ONLINE MINECRAFT • SOHBET • GÖRÜNTÜLÜ ARAMA</div>
 </header>
 
 <nav id="mainNav">
   <button class="nav-btn active" data-page="home" onclick="go('home')">🏠 Ana Sayfa</button>
+  <button class="nav-btn" data-page="minecraft" onclick="go('minecraft')" style="border-color:#22c55e">⛏️ Online Minecraft</button>
   <button class="nav-btn" data-page="games" onclick="go('games')">🎮 Oyunlar (50)</button>
   <button class="nav-btn" data-page="chat" onclick="go('chat')">💬 Canlı Sohbet <span id="netDot" style="color:#ff3c9d">●</span></button>
   <button class="nav-btn" data-page="call" onclick="go('call')">📞 Görüntülü Arama</button>
@@ -133,14 +143,13 @@ footer{text-align:center;padding:25px;color:var(--pink);font-weight:bold;letter-
   <button class="nav-btn" data-page="friends" onclick="go('friends')">👥 Arkadaşlar <span id="friendBadge" class="badge" style="display:none">0</span></button>
   <button class="nav-btn" data-page="groups" onclick="go('groups')">🛡️ Gruplar</button>
   <button class="nav-btn" data-page="leader" onclick="go('leader')">🏆 Liderlik</button>
-  <button class="nav-btn" data-page="settings" onclick="go('settings')">⚙️ Ayarlar</button>
 </nav>
 
 <main>
 <!-- 1. ANA SAYFA -->
 <section id="home" class="page active">
   <h2>🔥 ODHMA DÜNYASINA HOŞ GELDİN!</h2>
-  <p class="muted" style="text-align:center">Eğlence, rekabet ve görüntülü konuşma tek bir yerde!</p>
+  <p class="muted" style="text-align:center">Online Minecraft oyna, arkadaşlarınla sohbet et ve görüntülü konuş!</p>
   
   <div class="characters">
     <div class="card char-card neighbor">
@@ -156,15 +165,15 @@ footer{text-align:center;padding:25px;color:var(--pink);font-weight:bold;letter-
   </div>
 
   <div class="row">
-    <div class="panel">
-      <h2>🎮 OYUN MERKEZİ</h2>
-      <p class="muted">50 farklı mini oyun seni bekliyor!</p>
-      <button onclick="go('games')">OYUNLARA GİT</button>
+    <div class="panel" style="border-color:#22c55e">
+      <h2>⛏️ ONLINE MINECRAFT</h2>
+      <p class="muted">Steve veya Alex karakterini seç, arkadaşlarınla aynı dünyada blok inşa et!</p>
+      <button onclick="go('minecraft')" style="background:#15803d">DÜNYAYA GİR</button>
     </div>
     <div class="panel">
-      <h2>📞 GÖRÜNTÜLÜ ARAMA</h2>
-      <p class="muted">Arkadaşını ara ve canlı konuşmaya başla!</p>
-      <button onclick="go('call')">ARAMAYA GİT</button>
+      <h2>🎮 50 MİNİ OYUN</h2>
+      <p class="muted">Atari, zeka, spor ve aksiyon oyunları seni bekliyor!</p>
+      <button onclick="go('games')">OYUNLARA GİT</button>
     </div>
   </div>
 
@@ -175,6 +184,51 @@ footer{text-align:center;padding:25px;color:var(--pink);font-weight:bold;letter-
       AHMET'E SELAM
     </div>
     <div class="salut-owner">⚡ BY OSMAN ⚡</div>
+  </div>
+</section>
+
+<!-- YENİ: ONLINE MINECRAFT -->
+<section id="minecraft" class="page">
+  <h2>⛏️ ODHMA ONLINE MINECRAFT DÜNYASI</h2>
+  <div class="panel">
+    <p class="muted" style="margin-bottom:10px">Karakterini (Skin) Seç ve Arkadaşlarınla Beraber İnşa Et!</p>
+    
+    <!-- Skin Seçimi: Steve ve Alex -->
+    <div class="row" style="max-width:440px;margin:0 auto 12px">
+      <div id="skinSteveCard" class="mc-skin-card selected" onclick="selectMcSkin('steve')">
+        <div style="font-size:32px">🧑🏻</div>
+        <b>STEVE (Erkek)</b>
+        <div class="muted" style="font-size:11px">Turkuaz Tişört • Mavi Pantolon</div>
+      </div>
+      <div id="skinAlexCard" class="mc-skin-card" onclick="selectMcSkin('alex')">
+        <div style="font-size:32px">👩🏻‍🦰</div>
+        <b>ALEX (Kız)</b>
+        <div class="muted" style="font-size:11px">Yeşil Tunik • Turuncu Saç</div>
+      </div>
+    </div>
+
+    <!-- Blok Seçim Çubuğu (Hotbar) -->
+    <div class="mc-hotbar">
+      <div class="mc-slot active" onclick="selectMcBlock(1, this)">🟩 Çimen</div>
+      <div class="mc-slot" onclick="selectMcBlock(2, this)">🟫 Toprak</div>
+      <div class="mc-slot" onclick="selectMcBlock(3, this)">⬜ Taş</div>
+      <div class="mc-slot" onclick="selectMcBlock(4, this)">🪵 Odun</div>
+      <div class="mc-slot" onclick="selectMcBlock(5, this)">💎 Elmas</div>
+      <div class="mc-slot" onclick="selectMcBlock(0, this)" style="border-color:#ef4444">⛏️ Blok Kır</div>
+    </div>
+
+    <canvas id="mcCanvas" width="800" height="420"></canvas>
+
+    <!-- Mobil ve PC Kontrolleri -->
+    <div class="game-pad" style="margin-top:10px">
+      <button onclick="mcMove(-1)">⬅️ Sol (A)</button>
+      <button onclick="mcJump()">⬆️ Zıpla (W / Boşluk)</button>
+      <button onclick="mcMove(1)">Sağ (D) ➡️</button>
+      <button onclick="resetMcWorld()" style="background:#7f1d1d">🔄 Dünyayı Sıfırla</button>
+    </div>
+    <p class="muted" style="margin-top:8px;font-size:12px">
+      <b>Kontroller:</b> Hareket için <b>A / D</b> veya <b>Ok Tuşları</b>, zıplamak için <b>W / Boşluk</b>. Blok koymak veya kırmak için ekrana <b>tıkla!</b>
+    </p>
   </div>
 </section>
 
@@ -404,18 +458,6 @@ footer{text-align:center;padding:25px;color:var(--pink);font-weight:bold;letter-
     <div id="leaderboardList" class="muted">Ağdaki oyuncular bekleniyor...</div>
   </div>
 </section>
-
-<!-- 10. AYARLAR -->
-<section id="settings" class="page">
-  <h2>⚙️ AYARLAR</h2>
-  <div class="panel" style="text-align:left;max-width:500px;margin:15px auto">
-    <label style="display:flex;align-items:center;gap:10px;margin:8px 0;cursor:pointer">
-      <input type="checkbox" id="sound" style="width:auto" checked> Ses efektlerini aç
-    </label>
-    <button onclick="saveSettings()" style="margin-top:8px;width:100%">Kaydet</button>
-    <p id="settingsStatus" class="muted"></p>
-  </div>
-</section>
 </main>
 
 <footer>⚡ BY OSMAN ⚡<br><br>ODHMA GAMING</footer>
@@ -444,13 +486,13 @@ const TOPIC_CHAT = "odhma_gaming_osman_2026/chat";
 const TOPIC_SOCIAL = "odhma_gaming_osman_2026/social";
 const TOPIC_GROUPS = "odhma_gaming_osman_2026/groups";
 const TOPIC_CALL = "odhma_gaming_osman_2026/call";
+const TOPIC_MC = "odhma_gaming_osman_2026/minecraft";
 
 let mqttClient = null;
 let onlineUsers = {};
 let activeGroup = null;
 let liveGroups = {};
 
-// WebRTC Değişkenleri
 let peerConnection = null;
 let localStream = null;
 let incomingCallData = null;
@@ -478,6 +520,8 @@ function connectLiveNetwork(){
         handleGroupEvent(data);
       } else if(message.destinationName === TOPIC_CALL){
         handleCallSignaling(data);
+      } else if(message.destinationName === TOPIC_MC){
+        handleMcNetwork(data);
       }
     } catch(e){}
   };
@@ -486,11 +530,12 @@ function connectLiveNetwork(){
     useSSL: true,
     onSuccess: () => {
       if($('netDot')) $('netDot').style.color = '#00ff88';
-      if($('connStatusText')) $('connStatusText').textContent = '🟢 Canlı Ağ ve Arama Sistemi Aktif!';
+      if($('connStatusText')) $('connStatusText').textContent = '🟢 Canlı Ağ & Online Minecraft Bağlı!';
       mqttClient.subscribe(TOPIC_CHAT);
       mqttClient.subscribe(TOPIC_SOCIAL);
       mqttClient.subscribe(TOPIC_GROUPS);
       mqttClient.subscribe(TOPIC_CALL);
+      mqttClient.subscribe(TOPIC_MC);
       announcePresence();
       setInterval(announcePresence, 15000);
     },
@@ -508,6 +553,229 @@ function publishPacket(topic, obj){
   }
 }
 
+// ==========================================
+// ONLINE MINECRAFT OYUN MOTORU (STEVE & ALEX)
+// ==========================================
+const MC_COLS = 32;
+const MC_ROWS = 17;
+const MC_TILE = 25;
+let mcWorld = [];
+let mcSkin = 'steve'; // 'steve' veya 'alex'
+let mcSelectedBlock = 1;
+let mcPlayer = { x: 100, y: 150, vx: 0, vy: 0, onGround: false };
+let mcOtherPlayers = {};
+let mcLoopStarted = false;
+
+function initMcWorld(){
+  mcWorld = [];
+  for(let r = 0; r < MC_ROWS; r++){
+    let row = [];
+    for(let c = 0; c < MC_COLS; c++){
+      if(r === 11) row.push(1); // Çimen
+      else if(r > 11 && r < 15) row.push(2); // Toprak
+      else if(r >= 15) row.push(3); // Taş
+      else row.push(0); // Hava
+    }
+    mcWorld.push(row);
+  }
+  // Birkaç ağaç ve elmas süsü ekle
+  mcWorld[10][5] = 4; mcWorld[9][5] = 4; mcWorld[8][5] = 1; mcWorld[8][4] = 1; mcWorld[8][6] = 1;
+  mcWorld[10][24] = 4; mcWorld[9][24] = 4; mcWorld[8][24] = 1; mcWorld[8][23] = 1; mcWorld[8][25] = 1;
+  mcWorld[14][15] = 5; mcWorld[15][16] = 5;
+}
+
+function resetMcWorld(){
+  initMcWorld();
+  publishPacket(TOPIC_MC, { type: 'RESET' });
+}
+
+function selectMcSkin(skin){
+  mcSkin = skin;
+  $('skinSteveCard').classList.toggle('selected', skin === 'steve');
+  $('skinAlexCard').classList.toggle('selected', skin === 'alex');
+  sendMcPosition();
+}
+
+function selectMcBlock(blockId, el){
+  mcSelectedBlock = blockId;
+  document.querySelectorAll('.mc-slot').forEach(s => s.classList.remove('active'));
+  if(el) el.classList.add('active');
+}
+
+function mcMove(dir){
+  mcPlayer.vx = dir * 4;
+}
+
+function mcJump(){
+  if(mcPlayer.onGround){
+    mcPlayer.vy = -8.5;
+    mcPlayer.onGround = false;
+  }
+}
+
+function sendMcPosition(){
+  const p = profile();
+  publishPacket(TOPIC_MC, {
+    type: 'POS',
+    id: p.friendId,
+    name: p.name,
+    skin: mcSkin,
+    x: Math.round(mcPlayer.x),
+    y: Math.round(mcPlayer.y)
+  });
+}
+
+function handleMcNetwork(data){
+  const p = profile();
+  if(data.type === 'POS' && data.id !== p.friendId){
+    mcOtherPlayers[data.id] = { name: data.name, skin: data.skin, x: data.x, y: data.y, lastSeen: Date.now() };
+  }
+  else if(data.type === 'BLOCK'){
+    if(mcWorld[data.r] !== undefined){
+      mcWorld[data.r][data.c] = data.block;
+    }
+  }
+  else if(data.type === 'RESET'){
+    initMcWorld();
+  }
+}
+
+function drawMcCharacter(ctx, x, y, skin, name){
+  // İsim etiketi
+  ctx.fillStyle = 'rgba(0,0,0,0.6)';
+  ctx.fillRect(x - 15, y - 22, 50, 14);
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 10px Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText(name, x + 10, y - 12);
+
+  if(skin === 'steve'){
+    // STEVE (Erkek Skin)
+    ctx.fillStyle = '#3b2416'; // Koyu kahverengi saç
+    ctx.fillRect(x + 2, y, 16, 5);
+    ctx.fillStyle = '#d49a6a'; // Ten rengi
+    ctx.fillRect(x + 2, y + 5, 16, 11);
+    ctx.fillStyle = '#00a8a8'; // Turkuaz tişört
+    ctx.fillRect(x + 2, y + 16, 16, 16);
+    ctx.fillStyle = '#2b3a8c'; // Mavi pantolon
+    ctx.fillRect(x + 3, y + 32, 14, 14);
+  } else {
+    // ALEX (Kız Skin)
+    ctx.fillStyle = '#d9531e'; // Turuncu saç
+    ctx.fillRect(x + 1, y, 18, 6);
+    ctx.fillRect(x + 15, y + 6, 4, 12); // Uzun saç detayı
+    ctx.fillStyle = '#f3c19d'; // Açık ten rengi
+    ctx.fillRect(x + 2, y + 5, 15, 11);
+    ctx.fillStyle = '#4c9a2a'; // Yeşil tunik
+    ctx.fillRect(x + 2, y + 16, 16, 16);
+    ctx.fillStyle = '#4a3525'; // Kahverengi pantolon
+    ctx.fillRect(x + 3, y + 32, 14, 14);
+  }
+}
+
+function startMinecraftEngine(){
+  if(mcWorld.length === 0) initMcWorld();
+  if(mcLoopStarted) return;
+  mcLoopStarted = true;
+
+  const canvas = $('mcCanvas');
+  const ctx = canvas.getContext('2d');
+
+  // Fare ile blok koyma / kırma
+  canvas.addEventListener('mousedown', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const clickX = (e.clientX - rect.left) * scaleX;
+    const clickY = (e.clientY - rect.top) * scaleY;
+    const c = Math.floor(clickX / MC_TILE);
+    const r = Math.floor(clickY / MC_TILE);
+    if(r >= 0 && r < MC_ROWS && c >= 0 && c < MC_COLS){
+      mcWorld[r][c] = mcSelectedBlock;
+      publishPacket(TOPIC_MC, { type: 'BLOCK', r, c, block: mcSelectedBlock });
+      playBeep(mcSelectedBlock === 0 ? 300 : 650, 0.04);
+    }
+  });
+
+  // Klavye kontrolleri
+  window.addEventListener('keydown', (e) => {
+    if(!$('minecraft').classList.contains('active')) return;
+    if(e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft') mcPlayer.vx = -4;
+    if(e.key === 'd' || e.key === 'D' || e.key === 'ArrowRight') mcPlayer.vx = 4;
+    if(e.key === 'w' || e.key === 'W' || e.key === ' ' || e.key === 'ArrowUp') mcJump();
+  });
+
+  window.addEventListener('keyup', (e) => {
+    if(e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft' || e.key === 'd' || e.key === 'D' || e.key === 'ArrowRight'){
+      mcPlayer.vx = 0;
+    }
+  });
+
+  // Periyodik konum paylaşımı
+  setInterval(() => {
+    if($('minecraft').classList.contains('active')) sendMcPosition();
+  }, 150);
+
+  // Oyun döngüsü
+  setInterval(() => {
+    if(!$('minecraft').classList.contains('active')) return;
+
+    // Fizik & Yerçekimi
+    mcPlayer.vy += 0.5;
+    mcPlayer.x += mcPlayer.vx;
+    mcPlayer.y += mcPlayer.vy;
+
+    if(mcPlayer.x < 0) mcPlayer.x = 0;
+    if(mcPlayer.x > canvas.width - 20) mcPlayer.x = canvas.width - 20;
+
+    // Zemin çarpışma kontrolü
+    mcPlayer.onGround = false;
+    const footRow = Math.floor((mcPlayer.y + 46) / MC_TILE);
+    const colCenter = Math.floor((mcPlayer.x + 10) / MC_TILE);
+    if(footRow >= 0 && footRow < MC_ROWS && mcWorld[footRow] && mcWorld[footRow][colCenter] > 0){
+      mcPlayer.y = footRow * MC_TILE - 46;
+      mcPlayer.vy = 0;
+      mcPlayer.onGround = true;
+    }
+    if(mcPlayer.y > canvas.height - 46){
+      mcPlayer.y = canvas.height - 46;
+      mcPlayer.vy = 0;
+      mcPlayer.onGround = true;
+    }
+
+    // Ekranı çiz
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Blokları çiz
+    const colors = { 1: '#22c55e', 2: '#854d0e', 3: '#64748b', 4: '#78350f', 5: '#06b6d4' };
+    for(let r = 0; r < MC_ROWS; r++){
+      for(let c = 0; c < MC_COLS; c++){
+        const b = mcWorld[r][c];
+        if(b > 0){
+          ctx.fillStyle = colors[b];
+          ctx.fillRect(c * MC_TILE, r * MC_TILE, MC_TILE, MC_TILE);
+          ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+          ctx.strokeRect(c * MC_TILE, r * MC_TILE, MC_TILE, MC_TILE);
+        }
+      }
+    }
+
+    // Diğer oyuncuları çiz
+    const now = Date.now();
+    Object.entries(mcOtherPlayers).forEach(([id, op]) => {
+      if(now - op.lastSeen < 10000){
+        drawMcCharacter(ctx, op.x, op.y, op.skin, op.name);
+      }
+    });
+
+    // Kendi karakterimizi çiz
+    drawMcCharacter(ctx, mcPlayer.x, mcPlayer.y, mcSkin, profile().name);
+  }, 30);
+}
+
+// ==========================================
+// SOSYAL, SOHBET & ARAMA FONKSİYONLARI
+// ==========================================
 function announcePresence(){
   const p = profile();
   publishPacket(TOPIC_SOCIAL, { type: 'HELLO', friendId: p.friendId, name: p.name, className: p.className });
@@ -552,9 +820,6 @@ function handleGroupEvent(data){
   }
 }
 
-// ==========================================
-// WEBRTC ARAMA SİNYALİZASYONU
-// ==========================================
 async function startCall(withVideo){
   const targetId = $('callTargetId').value.trim().toUpperCase();
   const p = profile();
@@ -563,23 +828,13 @@ async function startCall(withVideo){
     return;
   }
   $('callStatus').textContent = '📞 Aranıyor...';
-  
   try {
     localStream = await navigator.mediaDevices.getUserMedia({ video: withVideo, audio: true });
     $('localVideo').srcObject = localStream;
-    
     createPeerConnection(targetId);
-    
     const offer = await peerConnection.createOffer();
     await peerConnection.setLocalDescription(offer);
-    
-    publishPacket(TOPIC_CALL, {
-      type: 'OFFER',
-      fromId: p.friendId,
-      fromName: p.name,
-      toId: targetId,
-      offer: offer
-    });
+    publishPacket(TOPIC_CALL, { type: 'OFFER', fromId: p.friendId, fromName: p.name, toId: targetId, offer: offer });
   } catch(e) {
     $('callStatus').textContent = '❌ Kamera veya mikrofon izni alınamadı!';
   }
@@ -587,30 +842,20 @@ async function startCall(withVideo){
 
 function createPeerConnection(remoteId){
   peerConnection = new RTCPeerConnection(rtcConfig);
-  
   localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
-  
   peerConnection.ontrack = event => {
     $('remoteVideo').srcObject = event.streams[0];
     $('callSetup').style.display = 'none';
     $('activeCallBox').style.display = 'block';
   };
-  
   peerConnection.onicecandidate = event => {
-    if(event.candidate){
-      publishPacket(TOPIC_CALL, {
-        type: 'CANDIDATE',
-        toId: remoteId,
-        candidate: event.candidate
-      });
-    }
+    if(event.candidate) publishPacket(TOPIC_CALL, { type: 'CANDIDATE', toId: remoteId, candidate: event.candidate });
   };
 }
 
 async function handleCallSignaling(data){
   const p = profile();
   if(data.toId !== p.friendId) return;
-
   if(data.type === 'OFFER'){
     incomingCallData = data;
     $('incomingCallerText').textContent = `${data.fromName} (${data.fromId}) sizi arıyor...`;
@@ -622,10 +867,8 @@ async function handleCallSignaling(data){
     $('callSetup').style.display = 'none';
     $('activeCallBox').style.display = 'block';
   }
-  else if(data.type === 'CANDIDATE'){
-    if(peerConnection){
-      try{ await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate)); }catch(e){}
-    }
+  else if(data.type === 'CANDIDATE' && peerConnection){
+    try{ await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate)); }catch(e){}
   }
   else if(data.type === 'REJECT' || data.type === 'HANGUP'){
     hangUpCall();
@@ -636,53 +879,32 @@ async function handleCallSignaling(data){
 async function acceptCall(){
   if(!incomingCallData) return;
   $('incomingCallBox').style.display = 'none';
-  
   try {
     localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
     $('localVideo').srcObject = localStream;
-    
     createPeerConnection(incomingCallData.fromId);
-    
     await peerConnection.setRemoteDescription(new RTCSessionDescription(incomingCallData.offer));
     const answer = await peerConnection.createAnswer();
     await peerConnection.setLocalDescription(answer);
-    
-    publishPacket(TOPIC_CALL, {
-      type: 'ANSWER',
-      toId: incomingCallData.fromId,
-      answer: answer
-    });
-  } catch(e){
-    alert('Kamera veya mikrofon açılamadı!');
-  }
+    publishPacket(TOPIC_CALL, { type: 'ANSWER', toId: incomingCallData.fromId, answer: answer });
+  } catch(e){ alert('Kamera veya mikrofon açılamadı!'); }
 }
 
 function rejectCall(){
-  if(incomingCallData){
-    publishPacket(TOPIC_CALL, { type: 'REJECT', toId: incomingCallData.fromId });
-  }
+  if(incomingCallData) publishPacket(TOPIC_CALL, { type: 'REJECT', toId: incomingCallData.fromId });
   $('incomingCallBox').style.display = 'none';
   incomingCallData = null;
 }
 
 function hangUpCall(){
-  if(peerConnection){
-    peerConnection.close();
-    peerConnection = null;
-  }
-  if(localStream){
-    localStream.getTracks().forEach(t => t.stop());
-    localStream = null;
-  }
+  if(peerConnection){ peerConnection.close(); peerConnection = null; }
+  if(localStream){ localStream.getTracks().forEach(t => t.stop()); localStream = null; }
   $('activeCallBox').style.display = 'none';
   $('incomingCallBox').style.display = 'none';
   $('callSetup').style.display = 'block';
   $('callStatus').textContent = '';
 }
 
-// ==========================================
-// SOHBET & DİĞER FONKSİYONLAR
-// ==========================================
 function receiveLiveMessage(msg){
   let msgs = get('odh_live_chat', []);
   if(msgs.some(m => m.id === msg.id)) return;
@@ -694,8 +916,7 @@ function receiveLiveMessage(msg){
 }
 
 function removeLiveMessage(id){
-  let msgs = get('odh_live_chat', []);
-  msgs = msgs.filter(m => m.id !== id);
+  let msgs = get('odh_live_chat', []).filter(m => m.id !== id);
   set('odh_live_chat', msgs);
   if($('chat').classList.contains('active')) renderChat(msgs);
 }
@@ -711,6 +932,7 @@ function go(page){
   $(page).classList.add('active');
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active', b.dataset.page===page));
   if(page!=='camera')stopStudioCamera();
+  if(page==='minecraft')startMinecraftEngine();
   if(page==='chat')renderChat(get('odh_live_chat', []));
   if(page==='profile')applyProfileToUI();
   if(page==='friends')loadFriends();
@@ -729,7 +951,6 @@ function renderChat(msgs){
     const content=document.createElement('div');content.className='msg-content';
     const s=document.createElement('small');
     s.textContent=`${m.name} (${m.senderId}) • ${m.className} • ${new Date(m.time).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'})}`;
-    
     if(m.senderId === p.friendId){
       const delBtn = document.createElement('button');
       delBtn.textContent = '🗑️ Sil';
@@ -737,7 +958,6 @@ function renderChat(msgs){
       delBtn.onclick = () => deleteMessage(m.id);
       s.appendChild(delBtn);
     }
-
     const t=document.createElement('div');t.textContent=m.text;
     content.append(s,t);d.append(img,content);
     box.append(d);
@@ -748,15 +968,7 @@ function renderChat(msgs){
 function sendMessage(){
   const input=$('message');const text=input.value.trim();if(!text)return;
   const p=profile();
-  const packet = {
-    id: 'msg_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
-    senderId: p.friendId,
-    name: p.name,
-    className: p.className,
-    avatar: p.avatar,
-    text: text,
-    time: Date.now()
-  };
+  const packet = { id: 'msg_' + Date.now() + '_' + Math.random().toString(36).slice(2,6), senderId: p.friendId, name: p.name, className: p.className, avatar: p.avatar, text: text, time: Date.now() };
   input.value='';
   receiveLiveMessage(packet);
   publishPacket(TOPIC_CHAT, packet);
@@ -768,57 +980,29 @@ function clearChatHistory(){
   set('odh_live_chat',[]);renderChat([]);
 }
 
-// ==========================================
-// ARKADAŞLIK & GRUP SİSTEMİ
-// ==========================================
 function updateFriendBadge(){
   const reqs = get('odh_reqs', []);
   const badge = $('friendBadge');
-  if(reqs.length > 0){
-    badge.style.display = 'inline-block';
-    badge.textContent = reqs.length;
-  } else {
-    badge.style.display = 'none';
-  }
+  badge.style.display = reqs.length > 0 ? 'inline-block' : 'none';
+  badge.textContent = reqs.length;
 }
 
 function sendFriendRequest(){
   const targetId = $('addFriendInput').value.trim().toUpperCase();
   const p = profile();
-  if(!targetId || targetId === p.friendId){
-    $('friendRequestStatus').textContent = '⚠️ Geçerli bir arkadaş ID gir!';
-    return;
-  }
-  publishPacket(TOPIC_SOCIAL, {
-    type: 'FRIEND_REQ',
-    fromId: p.friendId,
-    fromName: p.name,
-    toId: targetId
-  });
+  if(!targetId || targetId === p.friendId){ $('friendRequestStatus').textContent = '⚠️ Geçerli bir arkadaş ID gir!'; return; }
+  publishPacket(TOPIC_SOCIAL, { type: 'FRIEND_REQ', fromId: p.friendId, fromName: p.name, toId: targetId });
   $('addFriendInput').value = '';
   $('friendRequestStatus').textContent = '✅ Canlı arkadaşlık isteği gönderildi!';
 }
 
 function acceptFriend(fromId, fromName){
   const p = profile();
-  let reqs = get('odh_reqs', []).filter(r => r.fromId !== fromId);
-  set('odh_reqs', reqs);
-
+  set('odh_reqs', get('odh_reqs', []).filter(r => r.fromId !== fromId));
   let friends = get('odh_friends', []);
-  if(!friends.some(f => f.id === fromId)){
-    friends.push({ id: fromId, name: fromName });
-    set('odh_friends', friends);
-  }
-
-  publishPacket(TOPIC_SOCIAL, {
-    type: 'FRIEND_ACCEPT',
-    fromId: p.friendId,
-    fromName: p.name,
-    toId: fromId
-  });
-
-  updateFriendBadge();
-  loadFriends();
+  if(!friends.some(f => f.id === fromId)){ friends.push({ id: fromId, name: fromName }); set('odh_friends', friends); }
+  publishPacket(TOPIC_SOCIAL, { type: 'FRIEND_ACCEPT', fromId: p.friendId, fromName: p.name, toId: fromId });
+  updateFriendBadge(); loadFriends();
 }
 
 function loadFriends(){
@@ -826,103 +1010,65 @@ function loadFriends(){
   const reqDiv = $('incomingRequestsList');
   reqDiv.innerHTML = reqs.length === 0 ? 'Gelen istek yok.' : '';
   reqs.forEach(r => {
-    const row = document.createElement('div');
-    row.className = 'row';
-    row.style.margin = '6px 0';
+    const row = document.createElement('div'); row.className = 'row'; row.style.margin = '6px 0';
     row.innerHTML = `<span><b>${r.fromName}</b> (${r.fromId})</span>`;
-    const btn = document.createElement('button');
-    btn.textContent = '✅ Kabul Et';
-    btn.style.maxWidth = '130px';
+    const btn = document.createElement('button'); btn.textContent = '✅ Kabul Et'; btn.style.maxWidth = '130px';
     btn.onclick = () => acceptFriend(r.fromId, r.fromName);
-    row.append(btn);
-    reqDiv.append(row);
+    row.append(btn); reqDiv.append(row);
   });
-
   const list = get('odh_friends', []);
   const div = $('friendsList');
   div.innerHTML = list.length === 0 ? 'Henüz arkadaşın yok.' : '';
   list.forEach(f => {
-    let r = document.createElement('div');
-    r.style.margin = '6px 0';
+    let r = document.createElement('div'); r.style.margin = '6px 0';
     r.innerHTML = `<b>🤝 ${f.name}</b> <span class="muted">(${f.id})</span>`;
     div.append(r);
   });
 }
 
 function createGroup(){
-  const name = $('newGroupName').value.trim();
-  if(!name) return;
+  const name = $('newGroupName').value.trim(); if(!name) return;
   const groupId = 'g_' + Math.random().toString(36).slice(2,8);
   liveGroups[groupId] = { name: name, messages: [] };
   publishPacket(TOPIC_GROUPS, { type: 'GROUP_CREATE', groupId, name });
-  $('newGroupName').value = '';
-  openGroup(groupId);
+  $('newGroupName').value = ''; openGroup(groupId);
 }
 
 function loadGroups(){
   const div = $('myGroupsList');
   div.innerHTML = Object.keys(liveGroups).length === 0 ? 'Ağda henüz aktif grup yok.' : '';
   Object.entries(liveGroups).forEach(([id, g]) => {
-    const row = document.createElement('div');
-    row.className = 'row';
-    row.style.margin = '6px 0';
+    const row = document.createElement('div'); row.className = 'row'; row.style.margin = '6px 0';
     row.innerHTML = `<b>🛡️ ${g.name}</b>`;
-    const btn = document.createElement('button');
-    btn.textContent = 'Gruba Gir ➤';
-    btn.style.maxWidth = '130px';
+    const btn = document.createElement('button'); btn.textContent = 'Gruba Gir ➤'; btn.style.maxWidth = '130px';
     btn.onclick = () => openGroup(id);
-    row.append(btn);
-    div.append(row);
+    row.append(btn); div.append(row);
   });
 }
 
-function openGroup(id){
-  activeGroup = id;
-  $('activeGroupName').textContent = liveGroups[id].name;
-  $('activeGroupArea').style.display = 'block';
-  renderGroupChat();
-}
-
-function leaveGroup(){
-  activeGroup = null;
-  $('activeGroupArea').style.display = 'none';
-  loadGroups();
-}
-
+function openGroup(id){ activeGroup = id; $('activeGroupName').textContent = liveGroups[id].name; $('activeGroupArea').style.display = 'block'; renderGroupChat(); }
+function leaveGroup(){ activeGroup = null; $('activeGroupArea').style.display = 'none'; loadGroups(); }
 function renderGroupChat(){
   if(!activeGroup || !liveGroups[activeGroup]) return;
-  const box = $('groupChatBox');
-  box.innerHTML = '';
+  const box = $('groupChatBox'); box.innerHTML = '';
   const msgs = liveGroups[activeGroup].messages;
-  if(msgs.length === 0){
-    box.innerHTML = '<div class="muted" style="text-align:center;padding:20px">Grup sohbeti boş. İlk mesajı yaz!</div>';
-    return;
-  }
+  if(msgs.length === 0){ box.innerHTML = '<div class="muted" style="text-align:center;padding:20px">Grup sohbeti boş. İlk mesajı yaz!</div>'; return; }
   msgs.forEach(m => {
-    const d = document.createElement('div');
-    d.className = 'msg';
+    const d = document.createElement('div'); d.className = 'msg';
     d.innerHTML = `<div class="msg-content"><small>${m.name} • ${new Date(m.time).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'})}</small><div>${m.text}</div></div>`;
     box.append(d);
   });
   box.scrollTop = box.scrollHeight;
 }
-
 function sendGroupMessage(){
-  const input = $('groupMessageInput');
-  const text = input.value.trim();
-  if(!text || !activeGroup) return;
-  const p = profile();
-  const msg = { name: p.name, text: text, time: Date.now() };
+  const input = $('groupMessageInput'); const text = input.value.trim(); if(!text || !activeGroup) return;
+  const msg = { name: profile().name, text: text, time: Date.now() };
   if(!liveGroups[activeGroup].messages) liveGroups[activeGroup].messages = [];
   liveGroups[activeGroup].messages.push(msg);
   publishPacket(TOPIC_GROUPS, { type: 'GROUP_MSG', groupId: activeGroup, msg });
-  input.value = '';
-  renderGroupChat();
+  input.value = ''; renderGroupChat();
 }
 
-// ==========================================
-// KAMERA & PROFİL & OYUNLAR
-// ==========================================
 let studioStream=null, lastCapturedDataUrl='', selectedSticker='';
 async function startStudioCamera(){
   try{
@@ -943,9 +1089,7 @@ function captureStudioPhoto(){
   lastCapturedDataUrl=canvas.toDataURL('image/png');
   $('capturedPhotoImg').src=lastCapturedDataUrl;$('capturedResultArea').style.display='block';playBeep(750,0.07);
 }
-function useCapturedAsAvatar(){
-  if(!lastCapturedDataUrl)return;const p=profile();p.avatar=lastCapturedDataUrl;set('odh_profile',p);alert('✅ Profil resmi güncellendi!');go('profile');
-}
+function useCapturedAsAvatar(){ if(!lastCapturedDataUrl)return;const p=profile();p.avatar=lastCapturedDataUrl;set('odh_profile',p);alert('✅ Profil resmi güncellendi!');go('profile'); }
 function downloadCapturedPhoto(){if(!lastCapturedDataUrl)return;const a=document.createElement('a');a.href=lastCapturedDataUrl;a.download='odhma-foto.png';a.click();}
 function stopStudioCamera(){
   if(studioStream){studioStream.getTracks().forEach(t=>t.stop());studioStream=null;}
@@ -975,11 +1119,7 @@ function loadLeaderboard(){
     div.innerHTML += `<div class="row" style="padding:8px;margin:5px 0;background:#1d1636;border-radius:8px"><span><b>#${i+1} ${u.name}</b> (${u.className})</span><span style="color:var(--cyan);text-align:right">${id}</span></div>`;
   });
 }
-function saveSettings(){
-  set('odh_sound',$('sound').checked);$('settingsStatus').textContent='✅ Kaydedildi.';
-}
 function playBeep(freq=520,dur=0.06){
-  if(!get('odh_sound',true))return;
   try{const c=new(window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=freq;g.gain.value=0.04;o.start();o.stop(c.currentTime+dur);}catch{}
 }
 
